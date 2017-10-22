@@ -15,11 +15,11 @@ public class BinanceApiPublic {
   private static final String API_BASE = "https://www.binance.com/";
 
   public String getTime() {
-    return httpGet(generateQuery("api/v1/time"));
+    return httpGet(generateQuery("com/binance/api/v1/time"));
   }
 
   public String getDepth(String symbol) {
-    return httpGet(generateQuery("/api/v1/depth", "symbol", symbol));
+    return httpGet(generateQuery("/com/binance/api/v1/depth", "symbol", symbol));
   }
 
   private String httpGet(String query) {

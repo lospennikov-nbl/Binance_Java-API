@@ -6,6 +6,4 @@ public class BinanceApi {
   public BinanceApi (String key) {
     privateKey = key;
   }
-
-
 }

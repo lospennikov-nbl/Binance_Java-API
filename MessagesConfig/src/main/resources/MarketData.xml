@@ -1,0 +1,47 @@
+<binance-messages package="com.binance.api.message">
+  <message name="ping" address="v1/ping">
+  </message>
+
+  <message name="time" address="v1/time">
+  </message>
+
+  <message name="depth" address="v1/depth">
+    <parameter name="symbol" type="String"/>
+
+    <optional>
+      <parameter name="limit" type="Integer"/>
+    </optional>
+  </message>
+
+  <message name="aggTrades" address="v1/aggTrades">
+    <parameter name="symbol" type="String"/>
+
+    <optional>
+      <parameter name="fromId" type="Long"/>
+      <parameter name="startTime" type="Long"/>
+      <parameter name="endTime" type="Long"/>
+      <parameter name="limit" type="Integer"/>
+    </optional>
+  </message>
+
+  <message name="klines" address="v1/klines">
+    <parameter name="symbol" type="String"/>
+    <parameter name="interval" type="Interval"/>
+
+    <optional>
+      <parameter name="limit" type="Integer"/>
+      <parameter name="startTime" type="Long"/>
+      <parameter name="endTime" type="Long"/>
+    </optional>
+  </message>
+
+  <message name="ticker" address="v1/ticker/24hr">
+    <parameter name="symbol" type="String"/>
+  </message>
+
+  <message name="allPrices" address="v1/ticker/allPrices">
+  </message>
+
+  <message name="allBookTickers" address="v1/ticker/allBookTickers">
+  </message>
+</binance-messages>
