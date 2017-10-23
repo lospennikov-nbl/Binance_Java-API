@@ -21,10 +21,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.binance.api.generator.BinanceXMLAttributes.*;
+import static com.binance.api.generator.BinanceXMLAttributes.ADDRESS;
+import static com.binance.api.generator.BinanceXMLAttributes.ENUM;
+import static com.binance.api.generator.BinanceXMLAttributes.ENUMS_XML;
+import static com.binance.api.generator.BinanceXMLAttributes.MESSAGE;
+import static com.binance.api.generator.BinanceXMLAttributes.MESSAGES_XML;
+import static com.binance.api.generator.BinanceXMLAttributes.NAME;
+import static com.binance.api.generator.BinanceXMLAttributes.OPTIONAL;
+import static com.binance.api.generator.BinanceXMLAttributes.PACKAGE;
+import static com.binance.api.generator.BinanceXMLAttributes.PARAMETER;
+import static com.binance.api.generator.BinanceXMLAttributes.TYPE;
+import static com.binance.api.generator.BinanceXMLAttributes.VALUE;
 
 class MessageGenerator {
   private static String outPath;
@@ -51,7 +60,7 @@ class MessageGenerator {
           if (head.getTagName().equals(MESSAGES_XML) && node.getNodeName().equals(MESSAGE)) {
             handleMessage(node, packageName);
           } else if (head.getTagName().equals(ENUMS_XML) && node.getNodeName().equals(ENUM)) {
-            handleEnum();
+            handleEnum(node, packageName);
           } else {
             throw new MessageParseException("Message xml can contain only messages and enum xml can contain only enums");
           }
@@ -177,6 +186,8 @@ class MessageGenerator {
               "import java.util.Map;",
               "",
               "public class " + name + " {",
+              "",
+              String.format("public static final String %s = \"%s\";", ADDRESS.toUpperCase(), address),
               "")
           .write(fieldsList)
           .write(mandatoryConstructor)
@@ -186,6 +197,7 @@ class MessageGenerator {
       }
       writer.write("}");
     }
+//    TODO: getAddress, getQuery
   }
 
   private static void handleOptional(Node innerNode, Map<String, String> map) throws MessageParseException {
@@ -218,8 +230,71 @@ class MessageGenerator {
   }
 
 
-  private static void handleEnum() {
+  private static void handleEnum(Node node, String packageName) throws IOException {
+    Element element = (Element) node;
+    String name = element.getAttribute(NAME);
+    checkPresence(name, "Missing name of enum");
+    List<String> valueNames = new ArrayList<>();
+    Map<String, String> valueValues = new HashMap<>();
 
+    NodeList children = element.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node innerNode = children.item(i);
+      if (innerNode.getNodeType() == Node.ELEMENT_NODE) {
+        if (innerNode.getNodeName().equals(VALUE)) {
+          Element parameter = (Element) innerNode;
+          String valueName = parameter.getAttribute(NAME);
+          checkPresence(valueName, "Missing name of value");
+          valueNames.add(valueName);
+          String valueValue = parameter.getAttribute(VALUE);
+          if (!valueValue.isEmpty()) {
+            valueValues.put(valueName, valueValue);
+          }
+        } else {
+          throw new MessageParseException("Enum can contain only it's values");
+        }
+      }
+    }
+
+    List<String> enumValues = new ArrayList<>();
+    if (valueValues.isEmpty()) {
+      StringBuilder builder = new StringBuilder();
+      for (int i = 0; i < valueNames.size(); i++) {
+        builder.append(valueNames.get(i)).append(i == valueNames.size() - 1 ? ";" : ", ");
+      }
+      enumValues.add(builder.toString());
+    } else {
+      StringBuilder builder = new StringBuilder();
+      for (int i = 0; i < valueNames.size(); i++) {
+        String current = valueNames.get(i);
+        builder.append(current).append('(').append('"').append(valueValues.get(current)).append('"').append(')')
+            .append(i == valueNames.size() - 1 ? ";" : ", ");
+      }
+      enumValues.add(builder.toString());
+      enumValues.add("");
+      enumValues.add("private String value;");
+      enumValues.add("");
+      enumValues.add(String.format("%s(String value) {",  name));
+      enumValues.add("this.value = value;");
+      enumValues.add("}");
+      enumValues.add("");
+      enumValues.add("@Override");
+      enumValues.add("public String toString() {");
+      enumValues.add("return value;");
+      enumValues.add("}");
+    }
+
+    try (PrintWriter out = new PrintWriter(createFile(String.format("%s.java", name), outPath, packageName))) {
+      new CodeWriter(out)
+          .write(
+              "package " + packageName + ";",
+              "",
+              "public enum " + name + " {")
+          .write(enumValues)
+          .write(
+              "}"
+          );
+    }
   }
 
   private static File createFile(String name, String path, String packageName) throws IOException {
@@ -257,7 +332,6 @@ class MessageGenerator {
         throw optional.get();
       }
     }
-    Function<Integer, Integer> a = b -> b;
   }
 
 }

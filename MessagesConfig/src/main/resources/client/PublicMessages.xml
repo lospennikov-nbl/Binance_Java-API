@@ -1,4 +1,4 @@
-<binance-messages package="com.binance.api.message">
+<binance-messages package="com.binance.api.message.client">
   <message name="ping" address="v1/ping">
   </message>
 

@@ -1,0 +1,89 @@
+<binance-messages package="com.binance.api.message.client">
+
+  <message name="NewOrder" address="v3/order">
+    <parameter name="symbol" type="String"/>
+    <parameter name="side" type="Side"/>
+    <parameter name="type" type="Type"/>
+    <parameter name="timeInForce" type="TimeInForce"/>
+    <parameter name="quantity" type="Double"/>
+    <parameter name="price" type="Double"/>
+    <optional>
+      <parameter name="newClientOrderId" type="String"/>
+      <parameter name="stopPrice" type="Double"/>
+      <parameter name="icebergQty" type="Double"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+
+  <message name="OrderTest" address="v3/order/test">
+    <parameter name="symbol" type="String"/>
+    <parameter name="side" type="Side"/>
+    <parameter name="type" type="Type"/>
+    <parameter name="timeInForce" type="TimeInForce"/>
+    <parameter name="quantity" type="Double"/>
+    <parameter name="price" type="Double"/>
+    <optional>
+      <parameter name="newClientOrderId" type="String"/>
+      <parameter name="stopPrice" type="Double"/>
+      <parameter name="icebergQty" type="Double"/>
+      <parameter name="recvWindow" type="Long"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+
+  <message name="QueryOrder" address="v3/order">
+    <parameter name="symbol" type="String"/>
+    <optional>
+      <parameter name="orderId" type="Long"/>
+      <parameter name="origClientOrderId" type="String"/>
+      <parameter name="recvWindow" type="Long"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+
+  <message name="CancelOrder" address="v3/order">
+    <parameter name="symbol" type="String"/>
+    <optional>
+      <parameter name="orderId" type="Long"/>
+      <parameter name="origClientOrderId" type="String"/>
+      <parameter name="newClientOrderId" type="String"/>
+      <parameter name="recvWindow" type="Long"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+
+  <message name="OpenOrders" address="v3/openOrders">
+    <parameter name="symbol" type="String"/>
+    <optional>
+      <parameter name="recvWindow" type="Long"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+
+  <message name="AllOrders" address="v3/allOrders">
+    <parameter name="symbol" type="String"/>
+    <optional>
+      <parameter name="orderId" type="Long"/>
+      <parameter name="limit" type="Integer"/>
+      <parameter name="recvWindow" type="Long"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+
+  <message name="Account" address="v3/account">
+    <optional>
+      <parameter name="recvWindow" type="Long"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+
+  <message name="Trades" address="v3/myTrades">
+    <parameter name="symbol" type="String"/>
+    <optional>
+      <parameter name="limit" type="Integer"/>
+      <parameter name="fromId" type="Long"/>
+      <parameter name="recvWindow" type="Long"/>
+    </optional>
+    <parameter name="timestamp" type="Long"/>
+  </message>
+</binance-messages>

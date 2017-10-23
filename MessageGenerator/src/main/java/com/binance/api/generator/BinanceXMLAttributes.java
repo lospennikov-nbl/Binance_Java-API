@@ -1,6 +1,11 @@
 package com.binance.api.generator;
 
-class BinanceXMLAttributes {
+final class BinanceXMLAttributes {
+
+  private BinanceXMLAttributes () {
+
+  }
+
   static final String PACKAGE = "package";
 
   static final String NAME = "name";
@@ -11,7 +16,7 @@ class BinanceXMLAttributes {
 
   static final String MESSAGES_XML = "binance-messages";
 
-  static final String ENUMS_XML = "binance-enumbs";
+  static final String ENUMS_XML = "binance-enums";
 
   static final String MESSAGE = "message";
 
@@ -20,4 +25,6 @@ class BinanceXMLAttributes {
   static final String PARAMETER = "parameter";
 
   static final String OPTIONAL = "optional";
+
+  static final String VALUE = "value";
 }
