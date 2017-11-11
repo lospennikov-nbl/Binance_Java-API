@@ -32,6 +32,7 @@ import static com.binance.api.generator.BinanceXMLAttributes.NAME;
 import static com.binance.api.generator.BinanceXMLAttributes.OPTIONAL;
 import static com.binance.api.generator.BinanceXMLAttributes.PACKAGE;
 import static com.binance.api.generator.BinanceXMLAttributes.PARAMETER;
+import static com.binance.api.generator.BinanceXMLAttributes.SIGNED;
 import static com.binance.api.generator.BinanceXMLAttributes.TYPE;
 import static com.binance.api.generator.BinanceXMLAttributes.VALUE;
 
@@ -52,13 +53,14 @@ class MessageGenerator {
       if (packageName.isEmpty()) {
         throw new MessageParseException("Package is not specified");
       }
+      boolean isSigned = Boolean.parseBoolean(head.getAttribute(SIGNED));
       NodeList children = head.getChildNodes();
 
       for (int i = 0; i < children.getLength(); i++) {
         Node node = children.item(i);
         if (node.getNodeType() == Node.ELEMENT_NODE) {
           if (head.getTagName().equals(MESSAGES_XML) && node.getNodeName().equals(MESSAGE)) {
-            handleMessage(node, packageName);
+            handleMessage(node, packageName, isSigned);
           } else if (head.getTagName().equals(ENUMS_XML) && node.getNodeName().equals(ENUM)) {
             handleEnum(node, packageName);
           } else {
@@ -72,7 +74,7 @@ class MessageGenerator {
     }
   }
 
-  private static void handleMessage(Node node, String packageName) throws IOException {
+  private static void handleMessage(Node node, String packageName, boolean isSigned) throws IOException {
     Element element = (Element) node;
     Map<String, String> mandatory = new HashMap<>();
     Map<String, String> optional = new HashMap<>();
@@ -199,6 +201,9 @@ class MessageGenerator {
     }
 
     try (PrintWriter out = new PrintWriter(createFile(String.format("%s.java", name), outPath, packageName))) {
+      String queryHeader = isSigned ? "getQuery(String key)" : "getQuery()";
+      String returnQuery = isSigned ? "return Util.generateSigQuery(ADDRESS, key" : "return Util.generateQuery(ADDRESS";
+
       CodeWriter writer = new CodeWriter(out)
           .write("package " + packageName + ";",
               "",
@@ -221,15 +226,15 @@ class MessageGenerator {
 
       writer.write(
           "",
-          "public String getQuery() {"
+          String.format("public String %s {", queryHeader)
       );
       if (!queryList.isEmpty()) {
         writer.write("List<String> list = new ArrayList<>();")
             .write(queryList)
-            .write("return Util.generateQuery(ADDRESS, list.toArray(new String[list.size()]));");
+            .write(String.format("%s, list.toArray(new String[list.size()]));", returnQuery));
 
       } else {
-        writer.write("return Util.generateQuery(ADDRESS);");
+        writer.write(String.format("%s);", returnQuery));
       }
       writer.write("}");
 

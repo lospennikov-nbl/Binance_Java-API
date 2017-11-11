@@ -1,36 +1,35 @@
 package com.binance.api;
 
-import com.binance.api.message.client.AggTrades;
-import com.binance.api.message.client.Depth;
-import com.binance.api.message.client.Interval;
-import com.binance.api.message.client.Klines;
-import com.binance.api.message.client.Time;
+import com.binance.api.message.client.Account;
+import com.binance.api.message.client.AllOrders;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class Main {
 
   public static void main(String[] args) {
-    Path input = Paths.get("secret_key");
+    Path input = Paths.get("config");
     String privateKey = "";
+    String apiKey = "";
     try {
-      privateKey = Files.readAllLines(input).get(0);
+      List<String> config = Files.readAllLines(input);
+      privateKey = config.get(0);
+      apiKey = config.get(1);
     } catch (IOException e) {
       e.printStackTrace();
     }
-
-    BinanceApiPublic apiPublic = new BinanceApiPublic();
-    Time time = new Time();
-    System.out.println(time);
-    Depth depth = new Depth("CTRETH");
-    System.out.println(depth);
-    System.out.println(apiPublic.getTime(time));
-    AggTrades trades = new AggTrades("CTRETH");
-    Klines klines = new Klines("CTRETH", Interval.ONE_DAY);
-    System.out.println(apiPublic.getAggTrades(trades));
-    System.out.println(apiPublic.getKlines(klines));
+    Long time  = Util.getCurrentTime();
+    System.out.println(Util.generateSigQuery("v3/openOrders", privateKey, "symbol", "CTRETH" ,"recvWindow", "50000"));
+    Account account = new Account();
+    account.setRecvWindow(50000L);
+    System.out.println(account.getQuery(privateKey));
+    BinanceApi api = new BinanceApi(privateKey, apiKey);
+    AllOrders allOrders = new AllOrders("BCCETH");
+    allOrders.setRecvWindow(15_000L);
+    System.out.println(api.getAllOrders(allOrders));
   }
 }

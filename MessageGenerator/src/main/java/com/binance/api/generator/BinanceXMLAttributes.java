@@ -8,6 +8,8 @@ final class BinanceXMLAttributes {
 
   static final String PACKAGE = "package";
 
+  static final String SIGNED = "signed";
+
   static final String NAME = "name";
 
   static final String ADDRESS = "address";

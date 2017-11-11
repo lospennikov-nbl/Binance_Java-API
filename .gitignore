@@ -1,4 +1,4 @@
 **/*.iml
 .idea
 **/target/**
-secret_key
+config
