@@ -76,8 +76,8 @@ class MessageGenerator {
     Element element = (Element) node;
     Map<String, String> mandatory = new HashMap<>();
     Map<String, String> optional = new HashMap<>();
-    String name = element.getAttribute(NAME);
-    name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+    String baseName = element.getAttribute(NAME);
+    String name = Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
     String address = element.getAttribute(ADDRESS);
 
     checkPresence(name, "Missing name of message");
@@ -179,11 +179,34 @@ class MessageGenerator {
       setters.add("}");
     }
 
+    ArrayList<String> queryList = new ArrayList<>();
+    ArrayList<String> builderList = new ArrayList<>();
+
+    if (!mandatory.isEmpty() || !optional.isEmpty()) {
+      int i = 0;
+      for (String str : mandatory.keySet()) {
+        addToBuilderList(builderList, str, i++);
+        addToQueryList(queryList, str);
+      }
+      for (String str : optional.keySet()) {
+        queryList.add(String.format("if (%s != null) {", str));
+        builderList.add(String.format("if (%s != null) {", str));
+        addToBuilderList(builderList, str, i++);
+        addToQueryList(queryList, str);
+        queryList.add("}");
+        builderList.add("}");
+      }
+    }
+
     try (PrintWriter out = new PrintWriter(createFile(String.format("%s.java", name), outPath, packageName))) {
       CodeWriter writer = new CodeWriter(out)
           .write("package " + packageName + ";",
               "",
               "import java.util.Map;",
+              "import java.util.List;",
+              "import java.util.ArrayList;",
+              "",
+              "import com.binance.api.Util;",
               "",
               "public class " + name + " {",
               "",
@@ -195,9 +218,52 @@ class MessageGenerator {
       if (!getters.isEmpty()) {
         writer.write(getters).write(setters);
       }
+
+      writer.write(
+          "",
+          "public String getQuery() {"
+      );
+      if (!queryList.isEmpty()) {
+        writer.write("List<String> list = new ArrayList<>();")
+            .write(queryList)
+            .write("return Util.generateQuery(ADDRESS, list.toArray(new String[list.size()]));");
+
+      } else {
+        writer.write("return Util.generateQuery(ADDRESS);");
+      }
       writer.write("}");
+
+      writer.write("",
+          "@Override",
+          "public String toString() {"
+      );
+      if (!builderList.isEmpty()) {
+        writer
+            .write("StringBuilder builder = new StringBuilder(\"{\");")
+            .write(builderList)
+            .write(
+                "builder.append('}');",
+                "return builder.toString();"
+            );
+      } else {
+        writer.write("return \"{}\";");
+      }
+      writer.write(
+          "}",
+          "}"
+      );
     }
-//    TODO: getAddress, getQuery
+  }
+
+  private static void addToQueryList(List<String> queryList, String str) {
+    queryList.add(String.format("list.add(\"%s\");", str));
+    queryList.add(String.format("list.add(%s.toString());", str));
+  }
+
+  private static void addToBuilderList(List<String> builderList, String str, int pos) {
+    builderList.add(String.format("builder%s.append(\"%s: \").append(%s.toString());",
+        pos == 0 ? "" : ".append(\", \")",
+        str, str));
   }
 
   private static void handleOptional(Node innerNode, Map<String, String> map) throws MessageParseException {
@@ -274,7 +340,7 @@ class MessageGenerator {
       enumValues.add("");
       enumValues.add("private String value;");
       enumValues.add("");
-      enumValues.add(String.format("%s(String value) {",  name));
+      enumValues.add(String.format("%s(String value) {", name));
       enumValues.add("this.value = value;");
       enumValues.add("}");
       enumValues.add("");
@@ -333,5 +399,4 @@ class MessageGenerator {
       }
     }
   }
-
 }
