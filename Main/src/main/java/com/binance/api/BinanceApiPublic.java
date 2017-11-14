@@ -13,12 +13,12 @@ import static com.binance.api.Util.httpGet;
 
 public class BinanceApiPublic {
 
-  public String getPing(Ping ping) {
-    return httpGet(ping.getQuery());
+  public String getPing() {
+    return httpGet(Ping.getQuery());
   }
 
-  public String getTime(Time time) {
-    return httpGet(time.getQuery());
+  public String getTime() {
+    return httpGet(Time.getQuery());
   }
 
   public String getDepth(Depth depth) {
@@ -37,11 +37,11 @@ public class BinanceApiPublic {
     return httpGet(ticker.getQuery());
   }
 
-  public String getAllPrices(AllPrices allPrices) {
-    return httpGet(allPrices.getQuery());
+  public String getAllPrices() {
+    return httpGet(AllPrices.getQuery());
   }
 
-  public String getAllBockTickers(AllBookTickers allBookTickers) {
-    return httpGet(allBookTickers.getQuery());
+  public String getAllBockTickers() {
+    return httpGet(AllBookTickers.getQuery());
   }
 }

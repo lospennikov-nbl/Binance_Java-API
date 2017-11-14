@@ -1,5 +1,5 @@
-<binance-messages package="com.binance.api.message.client"  signed="true">
-  <message name="Withdraw" address="v1/withdraw.html">
+<binance-messages package="com.binance.api.message.client" signed="true">
+  <message name="Withdraw" address="wapi/v1/withdraw.html">
     <parameter name="asset" type="String"/>
     <parameter name="address" type="String"/>
     <parameter name="amount" type="Double"/>
@@ -7,10 +7,9 @@
       <parameter name="name" type="String"/>
       <parameter name="recvWindow" type="Long"/>
     </optional>
-    <parameter name="timestamp" type="Long"/>
   </message>
 
-  <message name="DepositHistory" address="v1/getDepositHistory.html">
+  <message name="DepositHistory" address="wapi/v1/getDepositHistory.html">
     <optional>
       <parameter name="asset" type="String"/>
       <parameter name="status" type="Integer"/>
@@ -18,10 +17,9 @@
       <parameter name="endTime" type="Long"/>
       <parameter name="recvWindow" type="Long"/>
     </optional>
-    <parameter name="timestamp" type="Long"/>
   </message>
 
-  <message name="WithdrawHistory" address="v1/getWithdrawHistory.html">
+  <message name="WithdrawHistory" address="wapi/v1/getWithdrawHistory.html">
     <optional>
       <parameter name="asset" type="String"/>
       <parameter name="status" type="Integer"/>
@@ -29,6 +27,5 @@
       <parameter name="endTime" type="Long"/>
       <parameter name="recvWindow" type="Long"/>
     </optional>
-    <parameter name="timestamp" type="Long"/>
   </message>
 </binance-messages>

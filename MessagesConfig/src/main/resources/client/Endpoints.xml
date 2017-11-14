@@ -1,12 +1,12 @@
 <binance-messages package="com.binance.api.message.client">
-  <message name="StartStream" address="v1/userDataStream">
+  <message name="StartStream" address="api/v1/userDataStream">
   </message>
 
-  <message name="KeepAliveStream" address="v1/userDataStream">
+  <message name="KeepAliveStream" address="api/v1/userDataStream">
     <parameter name="listenKey" type="String"/>
   </message>
 
-  <message name="CloseStream" address="v1/userDataStream">
+  <message name="CloseStream" address="api/v1/userDataStream">
     <parameter name="listenKey" type="String"/>
   </message>
 </binance-messages>

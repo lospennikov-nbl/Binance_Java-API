@@ -1,9 +1,9 @@
 <binance-messages package="com.binance.api.message.client" signed="true">
 
-  <message name="NewOrder" address="v3/order">
+  <message name="NewOrder" address="api/v3/order">
     <parameter name="symbol" type="String"/>
     <parameter name="side" type="Side"/>
-    <parameter name="type" type="Type"/>
+    <parameter name="type" type="OrderType"/>
     <parameter name="timeInForce" type="TimeInForce"/>
     <parameter name="quantity" type="Double"/>
     <parameter name="price" type="Double"/>
@@ -14,10 +14,10 @@
     </optional>
   </message>
 
-  <message name="OrderTest" address="v3/order/test">
+  <message name="OrderTest" address="api/v3/order/test">
     <parameter name="symbol" type="String"/>
     <parameter name="side" type="Side"/>
-    <parameter name="type" type="Type"/>
+    <parameter name="type" type="OrderType"/>
     <parameter name="timeInForce" type="TimeInForce"/>
     <parameter name="quantity" type="Double"/>
     <parameter name="price" type="Double"/>
@@ -29,7 +29,7 @@
     </optional>
   </message>
 
-  <message name="QueryOrder" address="v3/order">
+  <message name="QueryOrder" address="api/v3/order">
     <parameter name="symbol" type="String"/>
     <optional>
       <parameter name="orderId" type="Long"/>
@@ -38,7 +38,7 @@
     </optional>
   </message>
 
-  <message name="CancelOrder" address="v3/order">
+  <message name="CancelOrder" address="api/v3/order">
     <parameter name="symbol" type="String"/>
     <optional>
       <parameter name="orderId" type="Long"/>
@@ -48,14 +48,14 @@
     </optional>
   </message>
 
-  <message name="OpenOrders" address="v3/openOrders">
+  <message name="OpenOrders" address="api/v3/openOrders">
     <parameter name="symbol" type="String"/>
     <optional>
       <parameter name="recvWindow" type="Long"/>
     </optional>
   </message>
 
-  <message name="AllOrders" address="v3/allOrders">
+  <message name="AllOrders" address="api/v3/allOrders">
     <parameter name="symbol" type="String"/>
     <optional>
       <parameter name="orderId" type="Long"/>
@@ -64,13 +64,13 @@
     </optional>
   </message>
 
-  <message name="Account" address="v3/account">
+  <message name="Account" address="api/v3/account">
     <optional>
       <parameter name="recvWindow" type="Long"/>
     </optional>
   </message>
 
-  <message name="Trades" address="v3/myTrades">
+  <message name="Trades" address="api/v3/myTrades">
     <parameter name="symbol" type="String"/>
     <optional>
       <parameter name="limit" type="Integer"/>

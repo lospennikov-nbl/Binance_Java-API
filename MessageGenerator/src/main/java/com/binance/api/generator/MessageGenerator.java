@@ -99,6 +99,8 @@ class MessageGenerator {
       }
     }
 
+    boolean isStatic = mandatory.isEmpty() && optional.isEmpty();
+
     List<String> fieldsList = new ArrayList<>();
     for (Map.Entry<String, String> fieldEntry : mandatory.entrySet()) {
       fieldsList.add(String.format("private final %s %s;", fieldEntry.getValue(), fieldEntry.getKey()));
@@ -110,7 +112,7 @@ class MessageGenerator {
     }
 
     List<String> mandatoryConstructor = new ArrayList<>();
-    StringBuilder constructorBuilder = new StringBuilder("public ").append(name).append('(');
+    StringBuilder constructorBuilder = new StringBuilder(isStatic ? "private " : "public ").append(name).append('(');
     StringBuilder paramsBuilder = new StringBuilder();
 
     for (Map.Entry<String, String> fieldEntry : mandatory.entrySet()) {
@@ -202,7 +204,7 @@ class MessageGenerator {
 
     try (PrintWriter out = new PrintWriter(createFile(String.format("%s.java", name), outPath, packageName))) {
       String queryHeader = isSigned ? "getQuery(String key)" : "getQuery()";
-      String returnQuery = isSigned ? "return Util.generateSigQuery(ADDRESS, key" : "return Util.generateQuery(ADDRESS";
+      String returnQuery = isSigned ? "return MessageUtil.generateSigQuery(ADDRESS, key" : "return MessageUtil.generateQuery(ADDRESS";
 
       CodeWriter writer = new CodeWriter(out)
           .write("package " + packageName + ";",
@@ -211,7 +213,7 @@ class MessageGenerator {
               "import java.util.List;",
               "import java.util.ArrayList;",
               "",
-              "import com.binance.api.Util;",
+              "import com.binance.api.message.client.MessageUtil;",
               "",
               "public class " + name + " {",
               "",
@@ -226,7 +228,7 @@ class MessageGenerator {
 
       writer.write(
           "",
-          String.format("public String %s {", queryHeader)
+          String.format("public %sString %s {", isStatic ? "static " : "", queryHeader)
       );
       if (!queryList.isEmpty()) {
         writer.write("List<String> list = new ArrayList<>();")

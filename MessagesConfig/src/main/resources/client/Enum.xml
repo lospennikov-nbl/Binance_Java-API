@@ -13,7 +13,7 @@
     <value name="EXPIRED"/>
   </enum>
 
-  <enum name="Type">
+  <enum name="OrderType">
     <value name="LIMIT"/>
     <value name="MARKET"/>
   </enum>

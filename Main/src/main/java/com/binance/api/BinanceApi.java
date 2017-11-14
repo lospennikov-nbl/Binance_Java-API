@@ -2,23 +2,22 @@ package com.binance.api;
 
 import com.binance.api.message.client.Account;
 import com.binance.api.message.client.AggTrades;
-import com.binance.api.message.client.AllBookTickers;
 import com.binance.api.message.client.AllOrders;
-import com.binance.api.message.client.AllPrices;
 import com.binance.api.message.client.CancelOrder;
 import com.binance.api.message.client.CloseStream;
+import com.binance.api.message.client.DepositHistory;
 import com.binance.api.message.client.Depth;
 import com.binance.api.message.client.KeepAliveStream;
 import com.binance.api.message.client.Klines;
 import com.binance.api.message.client.NewOrder;
 import com.binance.api.message.client.OpenOrders;
 import com.binance.api.message.client.OrderTest;
-import com.binance.api.message.client.Ping;
 import com.binance.api.message.client.QueryOrder;
 import com.binance.api.message.client.StartStream;
 import com.binance.api.message.client.Ticker;
-import com.binance.api.message.client.Time;
 import com.binance.api.message.client.Trades;
+import com.binance.api.message.client.Withdraw;
+import com.binance.api.message.client.WithdrawHistory;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
@@ -37,12 +36,12 @@ public class BinanceApi {
     apiPublic = new BinanceApiPublic();
   }
 
-  public String getPing(Ping ping) {
-    return apiPublic.getPing(ping);
+  public String getPing() {
+    return apiPublic.getPing();
   }
 
-  public String getTime(Time time) {
-    return apiPublic.getTime(time);
+  public String getTime() {
+    return apiPublic.getTime();
   }
 
   public String getDepth(Depth depth) {
@@ -61,12 +60,12 @@ public class BinanceApi {
     return apiPublic.get24h(ticker);
   }
 
-  public String getAllPrices(AllPrices allPrices) {
-    return apiPublic.getAllPrices(allPrices);
+  public String getAllPrices() {
+    return apiPublic.getAllPrices();
   }
 
-  public String getAllBockTickers(AllBookTickers allBookTickers) {
-    return apiPublic.getAllBockTickers(allBookTickers);
+  public String getAllBockTickers() {
+    return apiPublic.getAllBockTickers();
   }
 
   public String sendNewOrder(NewOrder newOrder) {
@@ -101,10 +100,20 @@ public class BinanceApi {
     return Util.httpGet(trades.getQuery(privateKey), basicHeader);
   }
 
-  //TODO: withdraw
+  public String withdraw(Withdraw withdraw) {
+    return Util.httpPost(withdraw.getQuery(privateKey), basicHeader);
+  }
 
-  public String startStream(StartStream stream) {
-    return Util.httpPost(stream.getQuery(), basicHeader);
+  public String getDepositHistory(DepositHistory depositHistory){
+    return Util.httpPost(depositHistory.getQuery(privateKey), basicHeader);
+  }
+
+  public String getWithdrawHistory(WithdrawHistory withdrawHistory){
+    return Util.httpPost(withdrawHistory.getQuery(privateKey), basicHeader);
+  }
+
+  public String startStream() {
+    return Util.httpPost(StartStream.getQuery(), basicHeader);
   }
 
   public String keepAliveStream(KeepAliveStream stream) {
