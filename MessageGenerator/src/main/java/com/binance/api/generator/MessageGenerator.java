@@ -24,14 +24,18 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.binance.api.generator.BinanceXMLAttributes.ADDRESS;
+import static com.binance.api.generator.BinanceXMLAttributes.BEAN;
+import static com.binance.api.generator.BinanceXMLAttributes.BEANS_XML;
 import static com.binance.api.generator.BinanceXMLAttributes.ENUM;
 import static com.binance.api.generator.BinanceXMLAttributes.ENUMS_XML;
+import static com.binance.api.generator.BinanceXMLAttributes.FIELD;
 import static com.binance.api.generator.BinanceXMLAttributes.MESSAGE;
 import static com.binance.api.generator.BinanceXMLAttributes.MESSAGES_XML;
 import static com.binance.api.generator.BinanceXMLAttributes.NAME;
 import static com.binance.api.generator.BinanceXMLAttributes.OPTIONAL;
 import static com.binance.api.generator.BinanceXMLAttributes.PACKAGE;
 import static com.binance.api.generator.BinanceXMLAttributes.PARAMETER;
+import static com.binance.api.generator.BinanceXMLAttributes.PROPERTY;
 import static com.binance.api.generator.BinanceXMLAttributes.SIGNED;
 import static com.binance.api.generator.BinanceXMLAttributes.TYPE;
 import static com.binance.api.generator.BinanceXMLAttributes.VALUE;
@@ -63,6 +67,8 @@ class MessageGenerator {
             handleMessage(node, packageName, isSigned);
           } else if (head.getTagName().equals(ENUMS_XML) && node.getNodeName().equals(ENUM)) {
             handleEnum(node, packageName);
+          } else if (head.getTagName().equals(BEANS_XML) && node.getNodeName().equals(BEAN)) {
+            handleBean(node, packageName);
           } else {
             throw new MessageParseException("Message xml can contain only messages and enum xml can contain only enums");
           }
@@ -161,26 +167,12 @@ class MessageGenerator {
     List<String> setters = new ArrayList<>();
 
     for (Map.Entry<String, String> fieldEntry : mandatory.entrySet()) {
-      String methodName = Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
-
-      getters.add("");
-      getters.add(String.format("public %s get%s() {", fieldEntry.getValue(), methodName));
-      getters.add("return " + fieldEntry.getKey() + ";");
-      getters.add("}");
+      addGetter(getters, fieldEntry);
     }
 
     for (Map.Entry<String, String> fieldEntry : optional.entrySet()) {
-      String methodName = Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
-
-      getters.add("");
-      getters.add(String.format("public %s get%s() {", fieldEntry.getValue(), methodName));
-      getters.add("return this." + fieldEntry.getKey() + ";");
-      getters.add("}");
-
-      setters.add("");
-      setters.add(String.format("public void set%s(%s %s) {", methodName, fieldEntry.getValue(), fieldEntry.getKey()));
-      setters.add(String.format("this.%s = %s;", fieldEntry.getKey(), fieldEntry.getKey()));
-      setters.add("}");
+      addGetter(getters, fieldEntry);
+      addSetter(setters, fieldEntry);
     }
 
     ArrayList<String> queryList = new ArrayList<>();
@@ -240,23 +232,8 @@ class MessageGenerator {
       }
       writer.write("}");
 
-      writer.write("",
-          "@Override",
-          "public String toString() {"
-      );
-      if (!builderList.isEmpty()) {
-        writer
-            .write("StringBuilder builder = new StringBuilder(\"{\");")
-            .write(builderList)
-            .write(
-                "builder.append('}');",
-                "return builder.toString();"
-            );
-      } else {
-        writer.write("return \"{}\";");
-      }
+      writeToStringMethod(writer, builderList);
       writer.write(
-          "}",
           "}"
       );
     }
@@ -287,13 +264,51 @@ class MessageGenerator {
     }
   }
 
-  private static void insertMessage(Node innerNode, Map<String, String> map) throws MessageParseException {
+  private static void addGetter(List<String> getters, Map.Entry<String, String> fieldEntry) {
+    String methodName = Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
+
+    getters.add("");
+    getters.add(String.format("public %s get%s() {", fieldEntry.getValue(), methodName));
+    getters.add("return " + fieldEntry.getKey() + ";");
+    getters.add("}");
+  }
+
+  private static void addSetter(List<String> setters, Map.Entry<String, String> fieldEntry) {
+    String methodName = Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
+
+    setters.add("");
+    setters.add(String.format("public void set%s(%s %s) {", methodName, fieldEntry.getValue(), fieldEntry.getKey()));
+    setters.add(String.format("this.%s = %s;", fieldEntry.getKey(), fieldEntry.getKey()));
+    setters.add("}");
+  }
+
+  private static void writeToStringMethod(CodeWriter writer, List<String> builderList) {
+    writer.write("",
+        "@Override",
+        "public String toString() {"
+    );
+    if (!builderList.isEmpty()) {
+      writer
+          .write("StringBuilder builder = new StringBuilder(\"{\");")
+          .write(builderList)
+          .write(
+              "builder.append('}');",
+              "return builder.toString();"
+          );
+    } else {
+      writer.write("return \"{}\";");
+    }
+    writer.write("}");
+  }
+
+  private static String insertMessage(Node innerNode, Map<String, String> map) throws MessageParseException {
     Element parameter = (Element) innerNode;
     String fieldName = parameter.getAttribute(NAME);
     String fieldType = parameter.getAttribute(TYPE);
     checkPresence(fieldName, "Missing name of parameter");
     checkPresence(fieldType, "Missing parameter type");
     map.put(fieldName, fieldType);
+    return fieldName;
   }
 
   private static void checkPresence(String param, String message) throws MessageParseException {
@@ -302,6 +317,70 @@ class MessageGenerator {
     }
   }
 
+  private static void handleBean(Node node, String packageName) throws IOException {
+    Element element = (Element) node;
+    String name = element.getAttribute(NAME);
+    checkPresence(name, "Missing name of bean");
+    Map<String, String> fieldTypes = new HashMap<>();
+    Map<String, String> fieldProperties = new HashMap<>();
+    // TODO: handle properties with annotations
+
+    NodeList children = element.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node innerNode = children.item(i);
+      if (innerNode.getNodeType() == Node.ELEMENT_NODE) {
+        if (innerNode.getNodeName().equals(FIELD)) {
+          String fieldName = insertMessage(innerNode, fieldTypes);
+          String property = ((Element) innerNode).getAttribute(PROPERTY);
+          if (!property.isEmpty()) {
+            fieldProperties.put(fieldName, property);
+          }
+        } else {
+          throw new MessageParseException("Bean can contain only fields");
+        }
+      }
+    }
+
+    List<String> fieldsList = new ArrayList<>();
+    List<String> getters = new ArrayList<>();
+    List<String> setters = new ArrayList<>();
+    for (Map.Entry<String, String> fieldEntry : fieldTypes.entrySet()) {
+      fieldsList.add(String.format("private %s %s;", fieldEntry.getValue(), fieldEntry.getKey()));
+      fieldsList.add("");
+      addGetter(getters, fieldEntry);
+      addSetter(setters, fieldEntry);
+    }
+    if (!fieldsList.isEmpty()) {
+      fieldsList.remove(fieldsList.size() - 1);
+    }
+
+    ArrayList<String> builderList = new ArrayList<>();
+
+    if (!fieldTypes.isEmpty()) {
+      int i = 0;
+      for (String str : fieldTypes.keySet()) {
+        addToBuilderList(builderList, str, i++);
+      }
+    }
+
+    try (PrintWriter out = new PrintWriter(createFile(String.format("%s.java", name), outPath, packageName))) {
+      CodeWriter writer = new CodeWriter(out)
+          .write(
+              "package " + packageName + ";",
+              "",
+              "import java.util.List;",
+              "",
+              "public class " + name + " {")
+          .write(fieldsList)
+          .write(getters)
+          .write(setters);
+
+      writeToStringMethod(writer, builderList);
+      writer.write(
+          "}"
+      );
+    }
+  }
 
   private static void handleEnum(Node node, String packageName) throws IOException {
     Element element = (Element) node;

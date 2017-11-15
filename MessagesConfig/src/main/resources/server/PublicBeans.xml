@@ -8,13 +8,13 @@
 
 
   <bean name="AggTrades">
-    <field name="tradesList" type="List<Trade>"/>
+    <field name="tradesList" type="List&lt;Trade&gt;"/>
   </bean>
 
   <bean name="Trade">
     <field name="tradeId" property="a" type="Long"/>
     <field name="price" property="p" type="Double"/>
-    <field name="Quantity" property="q" type="Double"/>
+    <field name="quantity" property="q" type="Double"/>
     <field name="firstId" property="f" type="Long"/>
     <field name="lastId" property="l" type="Long"/>
     <field name="timestamp" property="T" type="Long"/>

@@ -29,7 +29,7 @@
                 <argument>-classpath</argument>
                 <classpath/>
                 <argument>com.binance.api.generator.MessageGenerator</argument>
-                <argument>/home/gleb/IdeaProjects/Binance_API/MessagesConfig/src/main/resources/client</argument>
+                <argument>${basedir}/../MessagesConfig/src/main/resources</argument>
                 <argument>${project.build.directory}/generated-sources/</argument>
               </arguments>
             </configuration>

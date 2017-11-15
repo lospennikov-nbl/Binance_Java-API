@@ -20,13 +20,21 @@ final class BinanceXMLAttributes {
 
   static final String ENUMS_XML = "binance-enums";
 
+  static final String BEANS_XML = "binance-beans";
+
   static final String MESSAGE = "message";
 
   static final String ENUM = "enum";
+
+  static final String BEAN = "bean";
 
   static final String PARAMETER = "parameter";
 
   static final String OPTIONAL = "optional";
 
   static final String VALUE = "value";
+
+  static final String FIELD = "field";
+
+  static final String PROPERTY = "property";
 }
