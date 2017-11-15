@@ -1,23 +1,24 @@
 package com.binance.api;
 
-import com.binance.api.message.client.Account;
-import com.binance.api.message.client.AggTrades;
-import com.binance.api.message.client.AllOrders;
-import com.binance.api.message.client.CancelOrder;
-import com.binance.api.message.client.CloseStream;
-import com.binance.api.message.client.DepositHistory;
-import com.binance.api.message.client.Depth;
-import com.binance.api.message.client.KeepAliveStream;
-import com.binance.api.message.client.Klines;
-import com.binance.api.message.client.NewOrder;
-import com.binance.api.message.client.OpenOrders;
-import com.binance.api.message.client.OrderTest;
-import com.binance.api.message.client.QueryOrder;
-import com.binance.api.message.client.StartStream;
-import com.binance.api.message.client.Ticker;
-import com.binance.api.message.client.Trades;
-import com.binance.api.message.client.Withdraw;
-import com.binance.api.message.client.WithdrawHistory;
+import com.binance.api.beans.Depth;
+import com.binance.api.messages.AccountMessage;
+import com.binance.api.messages.AggTradesMessage;
+import com.binance.api.messages.AllOrdersMessage;
+import com.binance.api.messages.CancelOrderMessage;
+import com.binance.api.messages.CloseStreamMessage;
+import com.binance.api.messages.DepositHistoryMessage;
+import com.binance.api.messages.DepthMessage;
+import com.binance.api.messages.KeepAliveStreamMessage;
+import com.binance.api.messages.KlinesMessage;
+import com.binance.api.messages.NewOrderMessage;
+import com.binance.api.messages.OpenOrdersMessage;
+import com.binance.api.messages.OrderTestMessage;
+import com.binance.api.messages.QueryOrderMessage;
+import com.binance.api.messages.StartStreamMessage;
+import com.binance.api.messages.TickerMessage;
+import com.binance.api.messages.TradesMessage;
+import com.binance.api.messages.WithdrawMessage;
+import com.binance.api.messages.WithdrawHistoryMessage;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
@@ -44,19 +45,19 @@ public class BinanceApi {
     return apiPublic.getTime();
   }
 
-  public String getDepth(Depth depth) {
+  public Depth getDepth(DepthMessage depth) {
     return apiPublic.getDepth(depth);
   }
 
-  public String getAggTrades(AggTrades aggTrades) {
+  public String getAggTrades(AggTradesMessage aggTrades) {
     return apiPublic.getAggTrades(aggTrades);
   }
 
-  public String getKlines(Klines klines) {
+  public String getKlines(KlinesMessage klines) {
     return apiPublic.getKlines(klines);
   }
 
-  public String get24h(Ticker ticker) {
+  public String get24h(TickerMessage ticker) {
     return apiPublic.get24h(ticker);
   }
 
@@ -68,59 +69,59 @@ public class BinanceApi {
     return apiPublic.getAllBockTickers();
   }
 
-  public String sendNewOrder(NewOrder newOrder) {
+  public String sendNewOrder(NewOrderMessage newOrder) {
     return Util.httpPost(newOrder.getQuery(privateKey), basicHeader);
   }
 
-  public String sendTestOrder(OrderTest order) {
+  public String sendTestOrder(OrderTestMessage order) {
     return Util.httpPost(order.getQuery(privateKey), basicHeader);
   }
 
-  public String getQueryOrder(QueryOrder order) {
+  public String getQueryOrder(QueryOrderMessage order) {
     return Util.httpGet(order.getQuery(privateKey), basicHeader);
   }
 
-  public String cancelOrder(CancelOrder cancelOrderMessage) {
+  public String cancelOrder(CancelOrderMessage cancelOrderMessage) {
     return Util.httpDelete(cancelOrderMessage.getQuery(privateKey), basicHeader);
   }
 
-  public String getOpenOrders(OpenOrders openOrders) {
+  public String getOpenOrders(OpenOrdersMessage openOrders) {
     return Util.httpGet(openOrders.getQuery(privateKey), basicHeader);
   }
 
-  public String getAllOrders(AllOrders allOrders) {
+  public String getAllOrders(AllOrdersMessage allOrders) {
     return Util.httpGet(allOrders.getQuery(privateKey), basicHeader);
   }
 
-  public String getAccount(Account account) {
+  public String getAccount(AccountMessage account) {
     return Util.httpGet(account.getQuery(privateKey), basicHeader);
   }
 
-  public String getTrades(Trades trades) {
+  public String getTrades(TradesMessage trades) {
     return Util.httpGet(trades.getQuery(privateKey), basicHeader);
   }
 
-  public String withdraw(Withdraw withdraw) {
+  public String withdraw(WithdrawMessage withdraw) {
     return Util.httpPost(withdraw.getQuery(privateKey), basicHeader);
   }
 
-  public String getDepositHistory(DepositHistory depositHistory){
+  public String getDepositHistory(DepositHistoryMessage depositHistory){
     return Util.httpPost(depositHistory.getQuery(privateKey), basicHeader);
   }
 
-  public String getWithdrawHistory(WithdrawHistory withdrawHistory){
+  public String getWithdrawHistory(WithdrawHistoryMessage withdrawHistory){
     return Util.httpPost(withdrawHistory.getQuery(privateKey), basicHeader);
   }
 
   public String startStream() {
-    return Util.httpPost(StartStream.getQuery(), basicHeader);
+    return Util.httpPost(StartStreamMessage.getQuery(), basicHeader);
   }
 
-  public String keepAliveStream(KeepAliveStream stream) {
+  public String keepAliveStream(KeepAliveStreamMessage stream) {
     return Util.httpPut(stream.getQuery(), basicHeader);
   }
 
-  public String closeStream(CloseStream stream) {
+  public String closeStream(CloseStreamMessage stream) {
     return Util.httpDelete(stream.getQuery(), basicHeader);
   }
 }

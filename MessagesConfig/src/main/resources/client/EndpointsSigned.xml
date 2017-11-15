@@ -1,5 +1,5 @@
-<binance-messages package="com.binance.api.message.client" signed="true">
-  <message name="Withdraw" address="wapi/v1/withdraw.html">
+<binance-messages package="com.binance.api.messages" signed="true">
+  <message name="WithdrawMessage" address="wapi/v1/withdraw.html">
     <parameter name="asset" type="String"/>
     <parameter name="address" type="String"/>
     <parameter name="amount" type="Double"/>
@@ -9,7 +9,7 @@
     </optional>
   </message>
 
-  <message name="DepositHistory" address="wapi/v1/getDepositHistory.html">
+  <message name="DepositHistoryMessage" address="wapi/v1/getDepositHistory.html">
     <optional>
       <parameter name="asset" type="String"/>
       <parameter name="status" type="Integer"/>
@@ -19,7 +19,7 @@
     </optional>
   </message>
 
-  <message name="WithdrawHistory" address="wapi/v1/getWithdrawHistory.html">
+  <message name="WithdrawHistoryMessage" address="wapi/v1/getWithdrawHistory.html">
     <optional>
       <parameter name="asset" type="String"/>
       <parameter name="status" type="Integer"/>

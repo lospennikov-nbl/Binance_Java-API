@@ -1,11 +1,11 @@
-<binance-messages package="com.binance.api.message.client">
-  <message name="ping" address="api/v1/ping">
+<binance-messages package="com.binance.api.messages">
+  <message name="PingMessage" address="api/v1/ping">
   </message>
 
-  <message name="time" address="api/v1/time">
+  <message name="TimeMessage" address="api/v1/time">
   </message>
 
-  <message name="depth" address="api/v1/depth">
+  <message name="DepthMessage" address="api/v1/depth">
     <parameter name="symbol" type="String"/>
 
     <optional>
@@ -13,7 +13,7 @@
     </optional>
   </message>
 
-  <message name="aggTrades" address="api/v1/aggTrades">
+  <message name="AggTradesMessage" address="api/v1/aggTrades">
     <parameter name="symbol" type="String"/>
 
     <optional>
@@ -24,7 +24,7 @@
     </optional>
   </message>
 
-  <message name="klines" address="api/v1/klines">
+  <message name="KlinesMessage" address="api/v1/klines">
     <parameter name="symbol" type="String"/>
     <parameter name="interval" type="Interval"/>
 
@@ -35,13 +35,13 @@
     </optional>
   </message>
 
-  <message name="ticker" address="api/v1/ticker/24hr">
+  <message name="TickerMessage" address="api/v1/ticker/24hr">
     <parameter name="symbol" type="String"/>
   </message>
 
-  <message name="allPrices" address="api/v1/ticker/allPrices">
+  <message name="AllPricesMessage" address="api/v1/ticker/allPrices">
   </message>
 
-  <message name="allBookTickers" address="api/v1/ticker/allBookTickers">
+  <message name="AllBookTickersMessage" address="api/v1/ticker/allBookTickers">
   </message>
 </binance-messages>

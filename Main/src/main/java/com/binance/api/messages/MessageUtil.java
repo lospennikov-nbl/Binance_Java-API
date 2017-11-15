@@ -1,4 +1,4 @@
-package com.binance.api.message.client;
+package com.binance.api.messages;
 
 import org.apache.commons.codec.digest.HmacUtils;
 

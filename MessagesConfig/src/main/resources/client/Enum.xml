@@ -1,4 +1,4 @@
-<binance-enums package="com.binance.api.message.client">
+<binance-enums package="com.binance.api.messages">
   <enum name="SymbolType">
     <value name="SPOT"/>
   </enum>

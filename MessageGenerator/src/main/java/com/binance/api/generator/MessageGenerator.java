@@ -213,7 +213,7 @@ class MessageGenerator {
               "import java.util.List;",
               "import java.util.ArrayList;",
               "",
-              "import com.binance.api.message.client.MessageUtil;",
+              String.format("import %s.MessageUtil;", packageName),
               "",
               "public class " + name + " {",
               "",

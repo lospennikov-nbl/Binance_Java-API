@@ -1,0 +1,24 @@
+<binance-beans package="com.binance.api.beans">
+  <bean name="Ping">
+  </bean>
+
+  <bean name="Time">
+    <field name="serverTime" type="Long"/>
+  </bean>
+
+
+  <bean name="AggTrades">
+    <field name="tradesList" type="List<Trade>"/>
+  </bean>
+
+  <bean name="Trade">
+    <field name="tradeId" property="a" type="Long"/>
+    <field name="price" property="p" type="Double"/>
+    <field name="Quantity" property="q" type="Double"/>
+    <field name="firstId" property="f" type="Long"/>
+    <field name="lastId" property="l" type="Long"/>
+    <field name="timestamp" property="T" type="Long"/>
+    <field name="wasMaker" property="m" type="Boolean"/>
+    <field name="wasBestPriceMath" property="M" type="Boolean"/>
+  </bean>
+</binance-beans>

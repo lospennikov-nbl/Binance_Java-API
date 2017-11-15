@@ -17,6 +17,7 @@
     <compiler.version>3.7.0</compiler.version>
     <httpclient.version>4.5.3</httpclient.version>
     <jdk.version>1.8</jdk.version>
+    <jackson.version>2.9.2</jackson.version>
   </properties>
 
   <build>
@@ -32,13 +33,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 </project>
