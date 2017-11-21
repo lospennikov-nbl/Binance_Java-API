@@ -1,72 +1,32 @@
 package com.binance.api;
 
-import com.binance.api.beans.Depth;
 import com.binance.api.messages.AccountMessage;
-import com.binance.api.messages.AggTradesMessage;
 import com.binance.api.messages.AllOrdersMessage;
 import com.binance.api.messages.CancelOrderMessage;
 import com.binance.api.messages.CloseStreamMessage;
 import com.binance.api.messages.DepositHistoryMessage;
-import com.binance.api.messages.DepthMessage;
 import com.binance.api.messages.KeepAliveStreamMessage;
-import com.binance.api.messages.KlinesMessage;
 import com.binance.api.messages.NewOrderMessage;
 import com.binance.api.messages.OpenOrdersMessage;
 import com.binance.api.messages.OrderTestMessage;
 import com.binance.api.messages.QueryOrderMessage;
 import com.binance.api.messages.StartStreamMessage;
-import com.binance.api.messages.TickerMessage;
 import com.binance.api.messages.TradesMessage;
-import com.binance.api.messages.WithdrawMessage;
 import com.binance.api.messages.WithdrawHistoryMessage;
+import com.binance.api.messages.WithdrawMessage;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
-public class BinanceApi {
+public class BinanceApi extends BinanceApiPublic {
   private static final String BASIC_HEADER_NAME = "X-MBX-APIKEY";
 
   private final String privateKey;
 
   private final Header basicHeader;
 
-  private final BinanceApiPublic apiPublic;
-
   public BinanceApi(String privateKey, String apiKey) {
     this.privateKey = privateKey;
     basicHeader = new BasicHeader(BASIC_HEADER_NAME, apiKey);
-    apiPublic = new BinanceApiPublic();
-  }
-
-  public String getPing() {
-    return apiPublic.getPing();
-  }
-
-  public String getTime() {
-    return apiPublic.getTime();
-  }
-
-  public Depth getDepth(DepthMessage depth) {
-    return apiPublic.getDepth(depth);
-  }
-
-  public String getAggTrades(AggTradesMessage aggTrades) {
-    return apiPublic.getAggTrades(aggTrades);
-  }
-
-  public String getKlines(KlinesMessage klines) {
-    return apiPublic.getKlines(klines);
-  }
-
-  public String get24h(TickerMessage ticker) {
-    return apiPublic.get24h(ticker);
-  }
-
-  public String getAllPrices() {
-    return apiPublic.getAllPrices();
-  }
-
-  public String getAllBockTickers() {
-    return apiPublic.getAllBockTickers();
   }
 
   public String sendNewOrder(NewOrderMessage newOrder) {

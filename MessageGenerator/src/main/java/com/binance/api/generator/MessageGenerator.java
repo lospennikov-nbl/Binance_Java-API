@@ -17,10 +17,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import static com.binance.api.generator.BinanceXMLAttributes.ADDRESS;
@@ -112,6 +115,7 @@ class MessageGenerator {
       fieldsList.add(String.format("private final %s %s;", fieldEntry.getValue(), fieldEntry.getKey()));
       fieldsList.add("");
     }
+
     for (Map.Entry<String, String> fieldEntry : optional.entrySet()) {
       fieldsList.add(String.format("private %s %s = null;", fieldEntry.getValue(), fieldEntry.getKey()));
       fieldsList.add("");
@@ -264,22 +268,24 @@ class MessageGenerator {
     }
   }
 
-  private static void addGetter(List<String> getters, Map.Entry<String, String> fieldEntry) {
-    String methodName = Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
 
+  private static void addGetter(List<String> getters, Map.Entry<String, String> fieldEntry, String... annotations) {
     getters.add("");
-    getters.add(String.format("public %s get%s() {", fieldEntry.getValue(), methodName));
+    getters.addAll(Arrays.asList(annotations));
+    getters.add(String.format("public %s get%s() {", fieldEntry.getValue(), getMethodName(fieldEntry)));
     getters.add("return " + fieldEntry.getKey() + ";");
     getters.add("}");
   }
 
   private static void addSetter(List<String> setters, Map.Entry<String, String> fieldEntry) {
-    String methodName = Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
-
     setters.add("");
-    setters.add(String.format("public void set%s(%s %s) {", methodName, fieldEntry.getValue(), fieldEntry.getKey()));
+    setters.add(String.format("public void set%s(%s %s) {", getMethodName(fieldEntry), fieldEntry.getValue(), fieldEntry.getKey()));
     setters.add(String.format("this.%s = %s;", fieldEntry.getKey(), fieldEntry.getKey()));
     setters.add("}");
+  }
+
+  private static String getMethodName(Map.Entry<String, String> fieldEntry) {
+    return Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
   }
 
   private static void writeToStringMethod(CodeWriter writer, List<String> builderList) {
@@ -321,9 +327,8 @@ class MessageGenerator {
     Element element = (Element) node;
     String name = element.getAttribute(NAME);
     checkPresence(name, "Missing name of bean");
-    Map<String, String> fieldTypes = new HashMap<>();
+    SortedMap<String, String> fieldTypes = new TreeMap<>();
     Map<String, String> fieldProperties = new HashMap<>();
-    // TODO: handle properties with annotations
 
     NodeList children = element.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
@@ -341,15 +346,56 @@ class MessageGenerator {
       }
     }
 
+    List<String> constructor = new ArrayList<>();
+    StringBuilder constructorBuilder = new StringBuilder("public ").append(name).append('(');
+
+    for (Map.Entry<String, String> fieldEntry : fieldTypes.entrySet()) {
+      constructorBuilder.append(fieldEntry.getValue()).append(' ').append(fieldEntry.getKey()).append(", ");
+    }
+    if (!fieldTypes.isEmpty()) {
+      constructorBuilder.delete(constructorBuilder.length() - ", ".length(), constructorBuilder.length());
+      constructor.add(String.format("public %s () {", name));
+      constructor.add("}");
+      constructor.add("");
+    }
+    constructorBuilder.append(") {");
+    constructor.add(constructorBuilder.toString());
+    for (String fieldName : fieldTypes.keySet()) {
+      constructor.add(String.format("this.%s = %s;", fieldName, fieldName));
+    }
+    constructor.add("}");
+
+
     List<String> fieldsList = new ArrayList<>();
     List<String> getters = new ArrayList<>();
     List<String> setters = new ArrayList<>();
+    List<String> fromList = new ArrayList<>();
+    fromList.add(String.format("public static %s fromList(Object ... objects) {", name));
+    fromList.add(String.format("%s result = new %s();", name, name));
+    fromList.add(String.format("if (objects.length != %d) {", fieldTypes.size()));
+    fromList.add("return null;");
+    fromList.add("}");
+    int index = 0;
     for (Map.Entry<String, String> fieldEntry : fieldTypes.entrySet()) {
       fieldsList.add(String.format("private %s %s;", fieldEntry.getValue(), fieldEntry.getKey()));
       fieldsList.add("");
-      addGetter(getters, fieldEntry);
+      fromList.add(String.format("if (objects[%d] instanceof %s) {", index++,
+          fieldEntry.getValue().replaceAll("<.*>", "")));
+      fromList.add(String.format("result.set%s((%s) objects[%d]);", getMethodName(fieldEntry), fieldEntry.getValue(), index++));
+      fromList.add("} else {");
+      fromList.add("return null;");
+      fromList.add("}");
+
+      if (!fieldProperties.containsKey(fieldEntry.getKey())) {
+        addGetter(getters, fieldEntry);
+      } else {
+        addGetter(getters, fieldEntry,
+            String.format("@JsonProperty(\"%s\")", fieldProperties.get(fieldEntry.getKey())));
+      }
       addSetter(setters, fieldEntry);
     }
+    fromList.add("return result;");
+    fromList.add("}");
     if (!fieldsList.isEmpty()) {
       fieldsList.remove(fieldsList.size() - 1);
     }
@@ -367,13 +413,20 @@ class MessageGenerator {
       CodeWriter writer = new CodeWriter(out)
           .write(
               "package " + packageName + ";",
-              "",
-              "import java.util.List;",
-              "",
+              "")
+          .write(fieldProperties.isEmpty() ?
+              List.of("import java.util.List;") :
+              List.of("import java.util.List;",
+                  "import com.fasterxml.jackson.annotation.JsonProperty;"))
+          .write("",
               "public class " + name + " {")
           .write(fieldsList)
+          .write("")
+          .write(constructor)
           .write(getters)
-          .write(setters);
+          .write(setters)
+          .write("")
+          .write(fromList);
 
       writeToStringMethod(writer, builderList);
       writer.write(

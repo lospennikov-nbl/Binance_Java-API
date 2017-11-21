@@ -44,6 +44,6 @@ public class Depth {
 
   @Override
   public String toString() {
-    return "{" + lastUpdateId + ", " + bids + ", " + asks + "}";
+    return "{" + lastUpdateId + ", bids: " + bids + ", asks:" + asks + "}";
   }
 }

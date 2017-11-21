@@ -21,4 +21,67 @@
     <field name="wasMaker" property="m" type="Boolean"/>
     <field name="wasBestPriceMath" property="M" type="Boolean"/>
   </bean>
+
+  <bean name="klines">
+    <field name="candlesticks" type="List&lt;Candlestick&gt;"/>
+  </bean>
+
+  <bean name="Candlestick">
+    <field name="openTime" type="Long"/>
+    <field name="open" type="Double"/>
+    <field name="high" type="Double"/>
+    <field name="low" type="Double"/>
+    <field name="close" type="Double"/>
+    <field name="volume" type="Double"/>
+    <field name="closeTime" type="Long"/>
+    <field name="quoteAssetVolume" type="Double"/>
+    <field name="numOfTrades" type="Integer"/>
+    <field name="baseAssetVolume" type="Double"/>
+    <field name="quoteAssetVolume" type="Double"/>
+    <field name="reserved" type="Double"/>
+  </bean>
+
+  <bean name="PriceChangeStat">
+    <field name="priceChange" type="Double"/>
+    <field name="priceChangePercent" type="Double"/>
+    <field name="weightedAvgPrice" type="Double"/>
+    <field name="prevClosePrice" type="Double"/>
+    <field name="lastPrice" type="Double"/>
+    <field name="lastQty" type="Double"/>
+    <field name="bidPrice" type="Double"/>
+    <field name="bidQty" type="Double"/>
+    <field name="askPrice" type="Double"/>
+    <field name="askQty" type="Double"/>
+    <field name="openPrice" type="Double"/>
+    <field name="highPrice" type="Double"/>
+    <field name="lowPrice" type="Double"/>
+    <field name="volume" type="Double"/>
+    <field name="quoteVolume" type="Double"/>
+    <field name="openTime" type="Long"/>
+    <field name="closeTime" type="Long"/>
+    <field name="firstId" type="Integer"/>
+    <field name="lastId" type="Integer"/>
+    <field name="count" type="Integer"/>
+  </bean>
+
+  <bean name="AllPrices">
+    <field name="symbolPrices" type="List&lt;SymbolPrice&gt;"/>
+  </bean>
+
+  <bean name="SymbolPrice">
+    <field name="symbol" type="String"/>
+    <field name="price" type="Double"/>
+  </bean>
+
+  <bean name="AllBookTickers">
+    <field name="bookTickers" type="List&lt;BookTicker&gt;"/>
+  </bean>
+
+  <bean name="BookTicker">
+    <field name="symbol" type="String"/>
+    <field name="bidPrice" type="Double"/>
+    <field name="bidQty" type="Double"/>
+    <field name="askPrice" type="Double"/>
+    <field name="askQty" type="Double"/>
+  </bean>
 </binance-beans>

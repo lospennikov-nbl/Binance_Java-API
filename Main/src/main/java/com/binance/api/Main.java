@@ -1,7 +1,10 @@
 package com.binance.api;
 
+import com.binance.api.beans.AggTrades;
 import com.binance.api.beans.Depth;
+import com.binance.api.messages.AggTradesMessage;
 import com.binance.api.messages.DepthMessage;
+import com.binance.api.messages.TickerMessage;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,20 +25,21 @@ public class Main {
     } catch (IOException e) {
       e.printStackTrace();
     }
-//    Account account = new Account();
-//    account.setRecvWindow(50000L);
-//    System.out.println(account.getQuery(privateKey));
     BinanceApiPublic api = new BinanceApiPublic();
-//    AllOrders allOrders = new AllOrders("BCCETH");
-//    allOrders.setRecvWindow(15_000L);
-//    System.out.println(api.getAllOrders(allOrders));
-//    OrderTest test = new OrderTest("BCCETH", Side.BUY, 0.1, 0.1, LIMIT, TimeInForce.GTC);
-//    System.out.println(test.getQuery(privateKey));
-//    System.out.println(api.sendTestOrder(test));
-//    DepositHistory history = new DepositHistory();
-//    System.out.println(api.getDepositHistory(history));
     DepthMessage depth = new DepthMessage("BCCETH");
     Depth result = api.getDepth(depth);
     System.out.println(result);
+
+    AggTradesMessage aggTradesMessage = new AggTradesMessage("BCCETH");
+    AggTrades aggTrades = api.getAggTrades(aggTradesMessage);
+    System.out.println(aggTrades);
+
+    System.out.println("ping: " + api.getPing());
+    System.out.println("time: " + api.getTime());
+    System.out.println("tickers: " + api.getAllBockTickers());
+    System.out.println("all prices: " + api.getAllPrices());
+
+    TickerMessage tickerMessage = new TickerMessage("BCCETH");
+    System.out.println("BCCETH 24h: " + api.get24h(tickerMessage));
   }
 }
