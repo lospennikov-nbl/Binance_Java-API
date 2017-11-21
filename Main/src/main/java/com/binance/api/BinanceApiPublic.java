@@ -4,7 +4,9 @@ import com.binance.api.beans.AggTrades;
 import com.binance.api.beans.AllBookTickers;
 import com.binance.api.beans.AllPrices;
 import com.binance.api.beans.BookTicker;
+import com.binance.api.beans.Candlestick;
 import com.binance.api.beans.Depth;
+import com.binance.api.beans.Klines;
 import com.binance.api.beans.Ping;
 import com.binance.api.beans.PriceChangeStat;
 import com.binance.api.beans.SymbolPrice;
@@ -21,6 +23,7 @@ import com.binance.api.messages.TimeMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -46,8 +49,18 @@ public class BinanceApiPublic {
     return jsonMapToList(aggTrades.getQuery(), AggTrades::new, Trade[].class);
   }
 
-  public String getKlines(KlinesMessage klines){
-    return httpGet(klines.getQuery());
+  public Klines getKlines(KlinesMessage message){
+    try {
+      Object[][] objects = mapper.readValue(httpGet(message.getQuery()), Object[][].class);
+      ArrayList<Candlestick> candlesticks = new ArrayList<>();
+      for (Object[] arr : objects) {
+        candlesticks.add(Candlestick.fromList(arr));
+      }
+      return new Klines(candlesticks);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public PriceChangeStat get24h(TickerMessage ticker) {

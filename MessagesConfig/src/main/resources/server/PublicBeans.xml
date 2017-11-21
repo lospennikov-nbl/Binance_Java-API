@@ -22,7 +22,7 @@
     <field name="wasBestPriceMath" property="M" type="Boolean"/>
   </bean>
 
-  <bean name="klines">
+  <bean name="Klines">
     <field name="candlesticks" type="List&lt;Candlestick&gt;"/>
   </bean>
 
@@ -36,8 +36,8 @@
     <field name="closeTime" type="Long"/>
     <field name="quoteAssetVolume" type="Double"/>
     <field name="numOfTrades" type="Integer"/>
-    <field name="baseAssetVolume" type="Double"/>
-    <field name="quoteAssetVolume" type="Double"/>
+    <field name="takerBuyBaseAssetVolume" type="Double"/>
+    <field name="takerBuyQuoteAssetVolume" type="Double"/>
     <field name="reserved" type="Double"/>
   </bean>
 

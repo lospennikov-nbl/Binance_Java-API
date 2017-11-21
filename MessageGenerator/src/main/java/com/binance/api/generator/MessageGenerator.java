@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import static com.binance.api.generator.BinanceXMLAttributes.ADDRESS;
@@ -171,12 +169,12 @@ class MessageGenerator {
     List<String> setters = new ArrayList<>();
 
     for (Map.Entry<String, String> fieldEntry : mandatory.entrySet()) {
-      addGetter(getters, fieldEntry);
+      addGetter(getters, fieldEntry.getKey(), fieldEntry.getValue());
     }
 
     for (Map.Entry<String, String> fieldEntry : optional.entrySet()) {
-      addGetter(getters, fieldEntry);
-      addSetter(setters, fieldEntry);
+      addGetter(getters, fieldEntry.getKey(), fieldEntry.getValue());
+      addSetter(setters, fieldEntry.getKey(), fieldEntry.getValue());
     }
 
     ArrayList<String> queryList = new ArrayList<>();
@@ -269,23 +267,23 @@ class MessageGenerator {
   }
 
 
-  private static void addGetter(List<String> getters, Map.Entry<String, String> fieldEntry, String... annotations) {
+  private static void addGetter(List<String> getters, String fieldName, String fieldType, String... annotations) {
     getters.add("");
     getters.addAll(Arrays.asList(annotations));
-    getters.add(String.format("public %s get%s() {", fieldEntry.getValue(), getMethodName(fieldEntry)));
-    getters.add("return " + fieldEntry.getKey() + ";");
+    getters.add(String.format("public %s get%s() {", fieldType, getMethodName(fieldName)));
+    getters.add("return " + fieldName + ";");
     getters.add("}");
   }
 
-  private static void addSetter(List<String> setters, Map.Entry<String, String> fieldEntry) {
+  private static void addSetter(List<String> setters, String fieldName, String fieldType) {
     setters.add("");
-    setters.add(String.format("public void set%s(%s %s) {", getMethodName(fieldEntry), fieldEntry.getValue(), fieldEntry.getKey()));
-    setters.add(String.format("this.%s = %s;", fieldEntry.getKey(), fieldEntry.getKey()));
+    setters.add(String.format("public void set%s(%s %s) {", getMethodName(fieldName), fieldType, fieldName));
+    setters.add(String.format("this.%s = %s;", fieldName, fieldName));
     setters.add("}");
   }
 
-  private static String getMethodName(Map.Entry<String, String> fieldEntry) {
-    return Character.toUpperCase(fieldEntry.getKey().charAt(0)) + fieldEntry.getKey().substring(1);
+  private static String getMethodName(String fieldName) {
+    return Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
   }
 
   private static void writeToStringMethod(CodeWriter writer, List<String> builderList) {
@@ -327,8 +325,9 @@ class MessageGenerator {
     Element element = (Element) node;
     String name = element.getAttribute(NAME);
     checkPresence(name, "Missing name of bean");
-    SortedMap<String, String> fieldTypes = new TreeMap<>();
+    Map<String, String> fieldTypes = new HashMap<>();
     Map<String, String> fieldProperties = new HashMap<>();
+    List<String> fieldNames = new ArrayList<>();
 
     NodeList children = element.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
@@ -336,6 +335,7 @@ class MessageGenerator {
       if (innerNode.getNodeType() == Node.ELEMENT_NODE) {
         if (innerNode.getNodeName().equals(FIELD)) {
           String fieldName = insertMessage(innerNode, fieldTypes);
+          fieldNames.add(fieldName);
           String property = ((Element) innerNode).getAttribute(PROPERTY);
           if (!property.isEmpty()) {
             fieldProperties.put(fieldName, property);
@@ -370,32 +370,7 @@ class MessageGenerator {
     List<String> getters = new ArrayList<>();
     List<String> setters = new ArrayList<>();
     List<String> fromList = new ArrayList<>();
-    fromList.add(String.format("public static %s fromList(Object ... objects) {", name));
-    fromList.add(String.format("%s result = new %s();", name, name));
-    fromList.add(String.format("if (objects.length != %d) {", fieldTypes.size()));
-    fromList.add("return null;");
-    fromList.add("}");
-    int index = 0;
-    for (Map.Entry<String, String> fieldEntry : fieldTypes.entrySet()) {
-      fieldsList.add(String.format("private %s %s;", fieldEntry.getValue(), fieldEntry.getKey()));
-      fieldsList.add("");
-      fromList.add(String.format("if (objects[%d] instanceof %s) {", index++,
-          fieldEntry.getValue().replaceAll("<.*>", "")));
-      fromList.add(String.format("result.set%s((%s) objects[%d]);", getMethodName(fieldEntry), fieldEntry.getValue(), index++));
-      fromList.add("} else {");
-      fromList.add("return null;");
-      fromList.add("}");
-
-      if (!fieldProperties.containsKey(fieldEntry.getKey())) {
-        addGetter(getters, fieldEntry);
-      } else {
-        addGetter(getters, fieldEntry,
-            String.format("@JsonProperty(\"%s\")", fieldProperties.get(fieldEntry.getKey())));
-      }
-      addSetter(setters, fieldEntry);
-    }
-    fromList.add("return result;");
-    fromList.add("}");
+    generateLists(name, fieldTypes, fieldProperties, fieldNames, fieldsList, getters, setters, fromList);
     if (!fieldsList.isEmpty()) {
       fieldsList.remove(fieldsList.size() - 1);
     }
@@ -433,6 +408,49 @@ class MessageGenerator {
           "}"
       );
     }
+  }
+
+  private static void generateLists(String name, Map<String, String> fieldTypes, Map<String, String> fieldProperties, List<String> fieldNames,
+                                    List<String> fieldsList, List<String> getters, List<String> setters, List<String> fromList) {
+    fromList.add(String.format("public static %s fromList(Object ... objects) throws BinanceJsonException {", name));
+    fromList.add(String.format("%s result = new %s();", name, name));
+    fromList.add(String.format("if (objects.length != %d) {", fieldTypes.size()));
+    System.out.println(name + " " + fieldTypes.size() + " " + fieldTypes);
+    fromList.add(String.format("throw new BinanceJsonException(\"Received \" + objects.length + \" objects, expected %s\");",
+        fieldTypes.size()));
+    fromList.add("}");
+    for (int i = 0; i < fieldNames.size(); i++) {
+      String fieldName = fieldNames.get(i);
+      String fieldType = fieldTypes.get(fieldName);
+      fieldsList.add(String.format("private %s %s;", fieldType, fieldName));
+      fieldsList.add("");
+      String desiredType = fieldType.replaceAll("<.*>", "");
+      if (desiredType.equals("Double")) {
+        desiredType = "String";
+      }
+      fromList.add(String.format("if (objects[%d] instanceof %s) {", i, desiredType));
+      if (!fieldType.equals("Double")) {
+        fromList.add(String.format("result.set%s((%s) objects[%d]);", getMethodName(fieldName), fieldType, i));
+      } else {
+        fromList.add(String.format("result.set%s(Double.parseDouble((String) objects[%d]));", getMethodName(fieldName), i));
+
+      }
+      fromList.add("} else {");
+      fromList.add(String.format(
+          "throw new BinanceJsonException(\"Invalid type for %s field (position %d), expected is %s, got value \" + objects[%d]);",
+          fieldName, i, fieldType, i));
+      fromList.add("}");
+
+      if (!fieldProperties.containsKey(fieldName)) {
+        addGetter(getters, fieldName, fieldType);
+      } else {
+        addGetter(getters, fieldName, fieldType,
+            String.format("@JsonProperty(\"%s\")", fieldProperties.get(fieldName)));
+      }
+      addSetter(setters, fieldName, fieldType);
+    }
+    fromList.add("return result;");
+    fromList.add("}");
   }
 
   private static void handleEnum(Node node, String packageName) throws IOException {

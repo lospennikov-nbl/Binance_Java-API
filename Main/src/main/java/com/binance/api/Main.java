@@ -4,6 +4,8 @@ import com.binance.api.beans.AggTrades;
 import com.binance.api.beans.Depth;
 import com.binance.api.messages.AggTradesMessage;
 import com.binance.api.messages.DepthMessage;
+import com.binance.api.messages.Interval;
+import com.binance.api.messages.KlinesMessage;
 import com.binance.api.messages.TickerMessage;
 
 import java.io.IOException;
@@ -41,5 +43,7 @@ public class Main {
 
     TickerMessage tickerMessage = new TickerMessage("BCCETH");
     System.out.println("BCCETH 24h: " + api.get24h(tickerMessage));
+
+    System.out.println("klines: " + api.getKlines(new KlinesMessage("BCCETH", Interval.FIVE_MINUTES)));
   }
 }
