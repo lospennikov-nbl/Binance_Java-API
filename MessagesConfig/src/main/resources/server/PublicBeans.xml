@@ -1,17 +1,19 @@
 <binance-beans package="com.binance.api.beans">
-  <bean name="Ping">
-  </bean>
-
   <bean name="Time">
     <field name="serverTime" type="Long"/>
   </bean>
 
-
   <bean name="AggTrades">
-    <field name="tradesList" type="List&lt;Trade&gt;"/>
+    <field name="tradesList" type="List&lt;AggTrade&gt;"/>
   </bean>
 
-  <bean name="Trade">
+  <bean name="Depth">
+    <field name="lastUpdateId" type="Integer"/>
+    <field name="bids" type="List&lt;Bid&gt;"/>
+    <field name="asks" type="List&lt;Ask&gt;"/>
+  </bean>
+
+  <bean name="AggTrade">
     <field name="tradeId" property="a" type="Long"/>
     <field name="price" property="p" type="Double"/>
     <field name="quantity" property="q" type="Double"/>
@@ -26,7 +28,7 @@
     <field name="candlesticks" type="List&lt;Candlestick&gt;"/>
   </bean>
 
-  <bean name="Candlestick">
+  <bean name="Candlestick" array="true">
     <field name="openTime" type="Long"/>
     <field name="open" type="Double"/>
     <field name="high" type="Double"/>

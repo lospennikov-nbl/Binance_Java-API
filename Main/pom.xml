@@ -11,6 +11,13 @@
 
   <artifactId>Main</artifactId>
 
+  <properties>
+    <httpclient.version>4.5.3</httpclient.version>
+    <jackson.version>2.9.2</jackson.version>
+    <commons-codec.version>1.10</commons-codec.version>
+    <websocket.version>9.4.7.v20170914</websocket.version>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -66,7 +73,7 @@
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.10</version>
+      <version>${commons-codec.version}</version>
     </dependency>
 
     <dependency>
@@ -85,6 +92,12 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jetty.websocket</groupId>
+      <artifactId>websocket-client</artifactId>
+      <version>${websocket.version}</version>
     </dependency>
   </dependencies>
 </project>

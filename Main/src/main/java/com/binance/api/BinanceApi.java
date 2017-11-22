@@ -1,5 +1,19 @@
 package com.binance.api;
 
+import com.binance.api.beans.AccountInfo;
+import com.binance.api.beans.AllOrders;
+import com.binance.api.beans.CancelOrder;
+import com.binance.api.beans.DataStream;
+import com.binance.api.beans.DepositHistory;
+import com.binance.api.beans.NewOrder;
+import com.binance.api.beans.OpenOrders;
+import com.binance.api.beans.OrderStatus;
+import com.binance.api.beans.Success;
+import com.binance.api.beans.Trade;
+import com.binance.api.beans.Trades;
+import com.binance.api.beans.WithdrawHistory;
+import com.binance.api.beans.WithdrawResponse;
+import com.binance.api.enums.Interval;
 import com.binance.api.messages.AccountMessage;
 import com.binance.api.messages.AllOrdersMessage;
 import com.binance.api.messages.CancelOrderMessage;
@@ -14,8 +28,16 @@ import com.binance.api.messages.StartStreamMessage;
 import com.binance.api.messages.TradesMessage;
 import com.binance.api.messages.WithdrawHistoryMessage;
 import com.binance.api.messages.WithdrawMessage;
+import com.binance.api.websocket.AggTradeSocket;
+import com.binance.api.websocket.DepthSocket;
+import com.binance.api.websocket.KlinesSocket;
+import com.binance.api.websocket.UserDataSocket;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
+
+import java.net.URI;
 
 public class BinanceApi extends BinanceApiPublic {
   private static final String BASIC_HEADER_NAME = "X-MBX-APIKEY";
@@ -29,59 +51,119 @@ public class BinanceApi extends BinanceApiPublic {
     basicHeader = new BasicHeader(BASIC_HEADER_NAME, apiKey);
   }
 
-  public String sendNewOrder(NewOrderMessage newOrder) {
-    return Util.httpPost(newOrder.getQuery(privateKey), basicHeader);
+  public NewOrder sendNewOrder(NewOrderMessage newOrderMessage) {
+    return jsonMap(Util.httpPost(newOrderMessage.getQuery(privateKey), basicHeader), NewOrder.class);
   }
 
-  public String sendTestOrder(OrderTestMessage order) {
-    return Util.httpPost(order.getQuery(privateKey), basicHeader);
+  public Success sendTestOrder(OrderTestMessage testMessage) {
+    return jsonMap(Util.httpPost(testMessage.getQuery(privateKey), basicHeader), Success.class);
   }
 
-  public String getQueryOrder(QueryOrderMessage order) {
-    return Util.httpGet(order.getQuery(privateKey), basicHeader);
+  public OrderStatus getQueryOrder(QueryOrderMessage queryOrderMessage) {
+    return jsonMap(Util.httpGet(queryOrderMessage.getQuery(privateKey), basicHeader), OrderStatus.class);
   }
 
-  public String cancelOrder(CancelOrderMessage cancelOrderMessage) {
-    return Util.httpDelete(cancelOrderMessage.getQuery(privateKey), basicHeader);
+  public CancelOrder cancelOrder(CancelOrderMessage cancelOrderMessage) {
+    return jsonMap(Util.httpDelete(cancelOrderMessage.getQuery(privateKey), basicHeader), CancelOrder.class);
   }
 
-  public String getOpenOrders(OpenOrdersMessage openOrders) {
-    return Util.httpGet(openOrders.getQuery(privateKey), basicHeader);
+  public OpenOrders getOpenOrders(OpenOrdersMessage openOrdersMessage) {
+    return jsonMapToList(Util.httpGet(openOrdersMessage.getQuery(privateKey), basicHeader), OpenOrders::new, OrderStatus[].class);
   }
 
-  public String getAllOrders(AllOrdersMessage allOrders) {
-    return Util.httpGet(allOrders.getQuery(privateKey), basicHeader);
+  public AllOrders getAllOrders(AllOrdersMessage allOrdersMessage) {
+    return jsonMapToList(Util.httpGet(allOrdersMessage.getQuery(privateKey), basicHeader), AllOrders::new, OrderStatus[].class);
   }
 
-  public String getAccount(AccountMessage account) {
-    return Util.httpGet(account.getQuery(privateKey), basicHeader);
+  public AccountInfo getAccountInfo(AccountMessage account) {
+    return jsonMap(Util.httpGet(account.getQuery(privateKey), basicHeader), AccountInfo.class);
   }
 
-  public String getTrades(TradesMessage trades) {
-    return Util.httpGet(trades.getQuery(privateKey), basicHeader);
+  public AccountInfo getAccountInfo() {
+    return jsonMap(Util.httpGet(AccountMessage.getStaticQuery(privateKey), basicHeader), AccountInfo.class);
   }
 
-  public String withdraw(WithdrawMessage withdraw) {
-    return Util.httpPost(withdraw.getQuery(privateKey), basicHeader);
+  public Trades getTrades(TradesMessage tradesMessage) {
+    return jsonMapToList(Util.httpGet(tradesMessage.getQuery(privateKey), basicHeader), Trades::new, Trade[].class);
   }
 
-  public String getDepositHistory(DepositHistoryMessage depositHistory){
-    return Util.httpPost(depositHistory.getQuery(privateKey), basicHeader);
+  public WithdrawResponse withdraw(WithdrawMessage withdrawMessage) {
+    return jsonMap(Util.httpPost(withdrawMessage.getQuery(privateKey), basicHeader), WithdrawResponse.class);
   }
 
-  public String getWithdrawHistory(WithdrawHistoryMessage withdrawHistory){
-    return Util.httpPost(withdrawHistory.getQuery(privateKey), basicHeader);
+  public DepositHistory getDepositHistory(DepositHistoryMessage depositHistoryMessage) {
+    return jsonMap(Util.httpPost(depositHistoryMessage.getQuery(privateKey), basicHeader), DepositHistory.class);
   }
 
-  public String startStream() {
-    return Util.httpPost(StartStreamMessage.getQuery(), basicHeader);
+  public DepositHistory getDepositHistory() {
+    return jsonMap(Util.httpPost(DepositHistoryMessage.getStaticQuery(privateKey), basicHeader), DepositHistory.class);
   }
 
-  public String keepAliveStream(KeepAliveStreamMessage stream) {
-    return Util.httpPut(stream.getQuery(), basicHeader);
+  public WithdrawHistory getWithdrawHistory(WithdrawHistoryMessage withdrawHistoryMessage) {
+    return jsonMap(Util.httpPost(withdrawHistoryMessage.getQuery(privateKey), basicHeader), WithdrawHistory.class);
   }
 
-  public String closeStream(CloseStreamMessage stream) {
-    return Util.httpDelete(stream.getQuery(), basicHeader);
+  public WithdrawHistory getWithdrawHistory() {
+    return jsonMap(Util.httpPost(WithdrawHistoryMessage.getStaticQuery(privateKey), basicHeader), WithdrawHistory.class);
+  }
+
+  public DataStream startStream() {
+    return jsonMap(Util.httpPost(StartStreamMessage.getQuery(), basicHeader), DataStream.class);
+  }
+
+  public Success keepAliveStream(KeepAliveStreamMessage stream) {
+    return jsonMap(Util.httpPut(stream.getQuery(), basicHeader), Success.class);
+  }
+
+  public Success closeStream(CloseStreamMessage stream) {
+    return jsonMap(Util.httpPut(stream.getQuery(), basicHeader), Success.class);
+  }
+
+  public Session getDepthSession(String symbol, DepthSocket socket) {
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@depth", symbol);
+    WebSocketClient client = new WebSocketClient();
+    try {
+      client.start();
+      return client.connect(socket, new URI(uri)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public Session getKlineSession(String symbol, Interval interval, KlinesSocket socket) {
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@kline_%s", symbol, interval);
+    WebSocketClient client = new WebSocketClient();
+    try {
+      client.start();
+      return client.connect(socket, new URI(uri)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public Session getAggTradeSession(String symbol, AggTradeSocket socket) {
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@aggTrade", symbol);
+    WebSocketClient client = new WebSocketClient();
+    try {
+      client.start();
+      return client.connect(socket, new URI(uri)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public Session getUserDataSession(String listenKey, UserDataSocket socket) {
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s", listenKey);
+    WebSocketClient client = new WebSocketClient();
+    try {
+      client.start();
+      return client.connect(socket, new URI(uri)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 }

@@ -1,4 +1,4 @@
-<binance-enums package="com.binance.api.messages">
+<binance-enums package="com.binance.api.enums">
   <enum name="SymbolType">
     <value name="SPOT"/>
   </enum>
@@ -29,7 +29,7 @@
   </enum>
 
   <enum name="Interval">
-    <value name="ONE_MINUTE" value="1m" />
+    <value name="ONE_MINUTE" value="1m"/>
     <value name="THREE_MINUTES" value="3m"/>
     <value name="FIVE_MINUTES" value="5m"/>
     <value name="FIFTEEN_MINUTES" value="15m"/>
@@ -45,4 +45,27 @@
     <value name="ONE_WEEK" value="1w"/>
     <value name="ONE_MONTH" value="1M"/>
   </enum>
+
+  <enum name="ExecutionType">
+    <value name="NEW"/>
+    <value name="CANCELED"/>
+    <value name="REPLACED"/>
+    <value name="REJECTED"/>
+    <value name="TRADE"/>
+    <value name="EXPIRED"/>
+  </enum>
+
+  <enum name="OrderRejectReason">
+    <value name="NONE"/>
+    <value name="UNKNOWN_INSTRUMENT"/>
+    <value name="MARKET_CLOSED"/>
+    <value name="PRICE_QTY_EXCEED_HARD_LIMITS"/>
+    <value name="UNKNOWN_ORDER"/>
+    <value name="DUPLICATE_ORDER"/>
+    <value name="UNKNOWN_ACCOUNT"/>
+    <value name="INSUFFICIENT_BALANCE"/>
+    <value name="ACCOUNT_INACTIVE"/>
+    <value name="ACCOUNT_CANNOT_SETTLE"/>
+  </enum>
+
 </binance-enums>

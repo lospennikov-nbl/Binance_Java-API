@@ -1,0 +1,128 @@
+<binance-beans package="com.binance.api.beans">
+  <bean name="NewOrder">
+    <field name="symbol" type="String"/>
+    <field name="orderId" type="Integer"/>
+    <field name="clientOrderId" type="String"/>
+    <field name="transactTime" type="Long"/>
+    <field name="price" type="Double"/>
+    <field name="origQty" type="Double"/>
+    <field name="executedQty" type="Double"/>
+    <field name="status" type="Status"/>
+    <field name="timeInForce" type="TimeInForce"/>
+    <field name="type" type="OrderType"/>
+    <field name="side" type="Side"/>
+  </bean>
+
+  <bean name="OrderStatus">
+    <field name="symbol" type="String"/>
+    <field name="orderId" type="Integer"/>
+    <field name="clientOrderId" type="String"/>
+    <field name="price" type="Double"/>
+    <field name="origQty" type="Double"/>
+    <field name="executedQty" type="Double"/>
+    <field name="status" type="Status"/>
+    <field name="timeInForce" type="TimeInForce"/>
+    <field name="type" type="OrderType"/>
+    <field name="side" type="Side"/>
+    <field name="stopPrice" type="Double"/>
+    <field name="icebergQty" type="Double"/>
+    <field name="time" type="Long"/>
+  </bean>
+
+  <bean name="CancelOrder">
+    <field name="symbol" type="String"/>
+    <field name="origClientOrderId" type="String"/>
+    <field name="orderId" type="Integer"/>
+    <field name="clientOrderId" type="String"/>
+  </bean>
+
+  <bean name="OpenOrders">
+    <field name="openOrders" type="List&lt;OrderStatus&gt;"/>
+  </bean>
+
+  <bean name="AllOrders">
+    <field name="openOrders" type="List&lt;OrderStatus&gt;"/>
+  </bean>
+
+  <bean name="AccountInfo">
+    <field name="makerCommission" type="Integer"/>
+    <field name="takerCommission" type="Integer"/>
+    <field name="buyerCommission" type="Integer"/>
+    <field name="sellerCommission" type="Integer"/>
+    <field name="canTrade" type="Boolean"/>
+    <field name="canWithdraw" type="Boolean"/>
+    <field name="canDeposit" type="Boolean"/>
+    <field name="balances" type="List&lt;Balance&gt;"/>
+  </bean>
+
+  <bean name="Balance">
+    <field name="asset" type="String"/>
+    <field name="free" type="Double"/>
+    <field name="locked" type="Double"/>
+  </bean>
+
+  <bean name="Trades">
+    <field name="tradesList" type="List&lt;Trade&gt;"/>
+  </bean>
+
+  <bean name="Trade">
+    <field name="id" type="Integer"/>
+    <field name="orderId" type="Integer"/>
+    <field name="price" type="Double"/>
+    <field name="quantity" property="qty" type="Double"/>
+    <field name="commission" type="Double"/>
+    <field name="commissionAsset" type="String"/>
+    <field name="time" type="Long"/>
+    <field name="isBuyer" type="Boolean"/>
+    <field name="isMaker" type="Boolean"/>
+    <field name="isBestMatch" type="Boolean"/>
+  </bean>
+
+  <bean name="WithdrawResponse">
+    <field name="msg" type="String"/>
+    <field name="success" type="Boolean"/>
+    <field name="id" type="String"/>
+  </bean>
+
+  <bean name="DepositHistory">
+    <field name="depositList" type="List&lt;Deposit&gt;"/>
+    <field name="success" type="Boolean"/>
+  </bean>
+
+  <bean name="Deposit">
+    <field name="insertTime" type="Long"/>
+    <field name="amount" type="Double"/>
+    <field name="asset" type="String"/>
+    <field name="address" type="String"/>
+    <field name="addressTag" type="String"/>
+    <field name="txId" type="String"/>
+    <field name="status" type="Integer"/>
+  </bean>
+
+  <bean name="WithdrawHistory">
+    <field name="withdrawList" type="List&lt;Withdraw&gt;"/>
+    <field name="success" type="Boolean"/>
+  </bean>
+
+  <bean name="Withdraw">
+    <field name="id" type="String"/>
+    <field name="amount" type="Double"/>
+    <field name="address" type="String"/>
+    <field name="addressTag" type="String"/>
+    <field name="txId" type="String"/>
+    <field name="asset" type="String"/>
+    <field name="applyTime" type="Long"/>
+    <field name="status" type="Integer"/>
+  </bean>
+
+  <bean name="DepositAdress">
+    <field name="address" type="String"/>
+    <field name="success" type="Boolean"/>
+    <field name="addressTag" type="String"/>
+    <field name="asset" type="String"/>
+  </bean>
+
+  <bean name="DataStream">
+    <field name="listenKey" type="String"/>
+  </bean>
+</binance-beans>

@@ -1,0 +1,102 @@
+<binance-beans package="com.binance.api.beans">
+  <bean name="DepthEndpoint">
+    <field name="eventType" property="e" type="String"/>
+    <field name="eventTime" property="E" type="Long"/>
+    <field name="symbol" property="s" type="String"/>
+    <field name="updateId" property="u" type="Integer"/>
+    <field name="unknown" property="U" type="Integer" ignored="true"/>
+    <field name="bids" property="b" type="List&lt;Bid&gt;"/>
+    <field name="asks" property="a" type="List&lt;Ask&gt;"/>
+  </bean>
+
+  <bean name="KlineEndpoint">
+    <field name="eventType" property="e" type="String"/>
+    <field name="eventTime" property="E" type="Long"/>
+    <field name="symbol" property="s" type="String"/>
+    <field name="candlestick" property="k" type="CandlestickEndpoint"/>
+  </bean>
+
+  <bean name="CandlestickEndpoint">
+    <field name="startTime" property="t" type="Long"/>
+    <field name="endTime" property="T" type="Long"/>
+    <field name="symbol" property="s" type="String"/>
+    <field name="interval" property="i" type="String"/>
+    <field name="firstTradeId" property="f" type="Integer"/>
+    <field name="lastTradeId" property="L" type="Integer"/>
+    <field name="openPrice" property="o" type="Double"/>
+    <field name="closePrice" property="c" type="Double"/>
+    <field name="highPrice" property="h" type="Double"/>
+    <field name="lowPrice" property="l" type="Double"/>
+    <field name="volume" property="v" type="Double"/>
+    <field name="tradesNumber" property="n" type="Integer"/>
+    <field name="isBarFinal" property="x" type="Boolean"/>
+    <field name="quoteVolume" property="q" type="Double"/>
+    <field name="activeBuyVolume" property="V" type="Double"/>
+    <field name="activeBuyQuoteVolume" property="Q" type="Double"/>
+    <field name="ignored" property="B" type="Double" ignored="true"/>
+  </bean>
+
+  <bean name="AggTradeEndpoint">
+    <field name="eventType" property="e" type="String"/>
+    <field name="eventTime" property="E" type="Long"/>
+    <field name="symbol" property="s" type="String"/>
+    <field name="aggregatedTradeId" property="a" type="Integer"/>
+    <field name="price" property="p" type="Double"/>
+    <field name="quantity" property="q" type="Double"/>
+    <field name="firstBreakdownTradeId" property="f" type="Integer"/>
+    <field name="lastBreakdownTradeId" property="l" type="Integer"/>
+    <field name="tradeTime" property="T" type="Long"/>
+    <field name="wasMaker" property="m" type="Boolean"/>
+    <field name="ignored" property="M" type="Boolean" ignored="true"/>
+  </bean>
+
+  <bean name="AccountUpdateEndpoint">
+    <field name="eventType" property="e" type="String"/>
+    <field name="eventTime" property="E" type="Long"/>
+    <field name="value_m" property="m" type="Integer" ignored="true"/>
+    <field name="value_t" property="t" type="Integer" ignored="true"/>
+    <field name="value_b" property="b" type="Integer" ignored="true"/>
+    <field name="value_s" property="s" type="Integer" ignored="true"/>
+    <field name="value_T" property="T" type="Boolean" ignored="true"/>
+    <field name="value_W" property="W" type="Boolean" ignored="true"/>
+    <field name="value_D" property="D" type="Boolean" ignored="true"/>
+    <field name="balances" property="B" type="List&lt;BalanceEndpoint&gt;"/>
+  </bean>
+
+  <bean name="BalanceEndpoint">
+    <field name="asset"  property="a" type="String"/>
+    <field name="free"  property="f" type="Double"/>
+    <field name="locked"  property="l" type="Double"/>
+  </bean>
+
+  <bean name="ExecutionReport">
+    <field name="eventType" property="e" type="String"/>
+    <field name="eventTime" property="E" type="Long"/>
+    <field name="symbol" property="s" type="String"/>
+    <field name="newClientOrderId" property="c" type="String"/>
+    <field name="side" property="S" type="Side"/>
+    <field name="orderType" property="o" type="OrderType"/>
+    <field name="timeInForce" property="f" type="TimeInForce"/>
+    <field name="originalQuantity" property="q" type="Double"/>
+    <field name="price" property="p" type="Double"/>
+    <field name="value_P" property="P" type="Double" ignored="true"/>
+    <field name="value_F" property="F" type="Double" ignored="true"/>
+    <field name="value_g" property="g" type="Integer" ignored="true"/>
+    <field name="value_C" property="C" type="String" ignored="true"/>
+    <field name="executionType" property="x" type="ExecutionType"/>
+    <field name="orderStatus" property="X" type="Status"/>
+    <field name="orderRejectReason" property="r" type="OrderRejectReason"/>
+    <field name="orderId" property="i" type="Integer"/>
+    <field name="lastFilledTradeQty" property="l" type="Double"/>
+    <field name="accumulatedQtyOfFilledTrades" property="z" type="Double"/>
+    <field name="lastFilledPrice" property="L" type="Double"/>
+    <field name="commission" property="n" type="Double"/>
+    <field name="commissionAsset" property="N" type="String"/>
+    <field name="tradeTime" property="T" type="Long"/>
+    <field name="tradeId" property="t" type="Integer"/>
+    <field name="value_I" property="I" type="Integer" ignored="true"/>
+    <field name="value_w" property="w" type="Boolean" ignored="true"/>
+    <field name="wasMaker" property="m" type="Boolean" />
+    <field name="value_M" property="M" type="Boolean" ignored="true"/>
+  </bean>
+</binance-beans>

@@ -37,4 +37,8 @@ final class BinanceXMLAttributes {
   static final String FIELD = "field";
 
   static final String PROPERTY = "property";
+
+  static final String ARRAY = "array";
+
+  static final String IGNORED = "ignored";
 }

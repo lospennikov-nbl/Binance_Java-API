@@ -32,7 +32,7 @@
   <message name="QueryOrderMessage" address="api/v3/order">
     <parameter name="symbol" type="String"/>
     <optional>
-      <parameter name="orderId" type="Long"/>
+      <parameter name="orderId" type="Integer"/>
       <parameter name="origClientOrderId" type="String"/>
       <parameter name="recvWindow" type="Long"/>
     </optional>
@@ -41,7 +41,7 @@
   <message name="CancelOrderMessage" address="api/v3/order">
     <parameter name="symbol" type="String"/>
     <optional>
-      <parameter name="orderId" type="Long"/>
+      <parameter name="orderId" type="Integer"/>
       <parameter name="origClientOrderId" type="String"/>
       <parameter name="newClientOrderId" type="String"/>
       <parameter name="recvWindow" type="Long"/>
@@ -58,7 +58,7 @@
   <message name="AllOrdersMessage" address="api/v3/allOrders">
     <parameter name="symbol" type="String"/>
     <optional>
-      <parameter name="orderId" type="Long"/>
+      <parameter name="orderId" type="Integer"/>
       <parameter name="limit" type="Integer"/>
       <parameter name="recvWindow" type="Long"/>
     </optional>

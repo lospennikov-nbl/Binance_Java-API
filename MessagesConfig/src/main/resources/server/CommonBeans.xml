@@ -1,0 +1,16 @@
+<binance-beans package="com.binance.api.beans">
+  <bean name="Success">
+  </bean>
+
+  <bean name="Bid" array="true">
+    <field name="price" type="Double"/>
+    <field name="quantity" type="Double"/>
+    <field name="ignored" type="Object[]" ignored="true"/>
+  </bean>
+
+  <bean name="Ask" array="true">
+    <field name="price" type="Double"/>
+    <field name="quantity" type="Double"/>
+    <field name="ignored" type="Object[]" ignored="true"/>
+  </bean>
+</binance-beans>

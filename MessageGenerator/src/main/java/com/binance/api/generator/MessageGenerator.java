@@ -19,17 +19,22 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.binance.api.generator.BinanceXMLAttributes.ADDRESS;
+import static com.binance.api.generator.BinanceXMLAttributes.ARRAY;
 import static com.binance.api.generator.BinanceXMLAttributes.BEAN;
 import static com.binance.api.generator.BinanceXMLAttributes.BEANS_XML;
 import static com.binance.api.generator.BinanceXMLAttributes.ENUM;
 import static com.binance.api.generator.BinanceXMLAttributes.ENUMS_XML;
 import static com.binance.api.generator.BinanceXMLAttributes.FIELD;
+import static com.binance.api.generator.BinanceXMLAttributes.IGNORED;
 import static com.binance.api.generator.BinanceXMLAttributes.MESSAGE;
 import static com.binance.api.generator.BinanceXMLAttributes.MESSAGES_XML;
 import static com.binance.api.generator.BinanceXMLAttributes.NAME;
@@ -83,8 +88,8 @@ class MessageGenerator {
 
   private static void handleMessage(Node node, String packageName, boolean isSigned) throws IOException {
     Element element = (Element) node;
-    Map<String, String> mandatory = new HashMap<>();
-    Map<String, String> optional = new HashMap<>();
+    Map<String, String> mandatory = new LinkedHashMap<>();
+    Map<String, String> optional = new LinkedHashMap<>();
     String baseName = element.getAttribute(NAME);
     String name = Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
     String address = element.getAttribute(ADDRESS);
@@ -207,6 +212,8 @@ class MessageGenerator {
               "import java.util.List;",
               "import java.util.ArrayList;",
               "",
+              "import com.binance.api.enums.*;",
+              "",
               String.format("import %s.MessageUtil;", packageName),
               "",
               "public class " + name + " {",
@@ -234,6 +241,15 @@ class MessageGenerator {
       }
       writer.write("}");
 
+      if (!isStatic && mandatory.isEmpty()) {
+        writer.write(
+            "",
+            String.format("public static String %s {", queryHeader.replace("getQuery", "getStaticQuery")),
+            String.format("%s);", returnQuery),
+            "}"
+        );
+      }
+
       writeToStringMethod(writer, builderList);
       writer.write(
           "}"
@@ -247,9 +263,9 @@ class MessageGenerator {
   }
 
   private static void addToBuilderList(List<String> builderList, String str, int pos) {
-    builderList.add(String.format("builder%s.append(\"%s: \").append(%s.toString());",
+    builderList.add(String.format("builder%s.append(\"%s: \").append(%s == null ? \"null\" : %s.toString());",
         pos == 0 ? "" : ".append(\", \")",
-        str, str));
+        str, str, str));
   }
 
   private static void handleOptional(Node innerNode, Map<String, String> map) throws MessageParseException {
@@ -267,16 +283,16 @@ class MessageGenerator {
   }
 
 
-  private static void addGetter(List<String> getters, String fieldName, String fieldType, String... annotations) {
+  private static void addGetter(List<String> getters, String fieldName, String fieldType) {
     getters.add("");
-    getters.addAll(Arrays.asList(annotations));
     getters.add(String.format("public %s get%s() {", fieldType, getMethodName(fieldName)));
     getters.add("return " + fieldName + ";");
     getters.add("}");
   }
 
-  private static void addSetter(List<String> setters, String fieldName, String fieldType) {
+  private static void addSetter(List<String> setters, String fieldName, String fieldType, String... annotations) {
     setters.add("");
+    setters.addAll(Arrays.asList(annotations));
     setters.add(String.format("public void set%s(%s %s) {", getMethodName(fieldName), fieldType, fieldName));
     setters.add(String.format("this.%s = %s;", fieldName, fieldName));
     setters.add("}");
@@ -325,9 +341,10 @@ class MessageGenerator {
     Element element = (Element) node;
     String name = element.getAttribute(NAME);
     checkPresence(name, "Missing name of bean");
-    Map<String, String> fieldTypes = new HashMap<>();
-    Map<String, String> fieldProperties = new HashMap<>();
-    List<String> fieldNames = new ArrayList<>();
+    Map<String, String> fieldTypes = new LinkedHashMap<>();
+    Map<String, String> fieldProperties = new LinkedHashMap<>();
+    Set<String> ignored = new HashSet<>();
+    boolean isArray = Boolean.parseBoolean(element.getAttribute(ARRAY));
 
     NodeList children = element.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
@@ -335,10 +352,12 @@ class MessageGenerator {
       if (innerNode.getNodeType() == Node.ELEMENT_NODE) {
         if (innerNode.getNodeName().equals(FIELD)) {
           String fieldName = insertMessage(innerNode, fieldTypes);
-          fieldNames.add(fieldName);
           String property = ((Element) innerNode).getAttribute(PROPERTY);
           if (!property.isEmpty()) {
             fieldProperties.put(fieldName, property);
+          }
+          if (Boolean.parseBoolean(((Element) innerNode).getAttribute(IGNORED))) {
+            ignored.add(fieldName);
           }
         } else {
           throw new MessageParseException("Bean can contain only fields");
@@ -350,7 +369,9 @@ class MessageGenerator {
     StringBuilder constructorBuilder = new StringBuilder("public ").append(name).append('(');
 
     for (Map.Entry<String, String> fieldEntry : fieldTypes.entrySet()) {
-      constructorBuilder.append(fieldEntry.getValue()).append(' ').append(fieldEntry.getKey()).append(", ");
+      if (!ignored.contains(fieldEntry.getKey())) {
+        constructorBuilder.append(fieldEntry.getValue()).append(' ').append(fieldEntry.getKey()).append(", ");
+      }
     }
     if (!fieldTypes.isEmpty()) {
       constructorBuilder.delete(constructorBuilder.length() - ", ".length(), constructorBuilder.length());
@@ -361,7 +382,9 @@ class MessageGenerator {
     constructorBuilder.append(") {");
     constructor.add(constructorBuilder.toString());
     for (String fieldName : fieldTypes.keySet()) {
-      constructor.add(String.format("this.%s = %s;", fieldName, fieldName));
+      if (!ignored.contains(fieldName)) {
+        constructor.add(String.format("this.%s = %s;", fieldName, fieldName));
+      }
     }
     constructor.add("}");
 
@@ -369,8 +392,24 @@ class MessageGenerator {
     List<String> fieldsList = new ArrayList<>();
     List<String> getters = new ArrayList<>();
     List<String> setters = new ArrayList<>();
-    List<String> fromList = new ArrayList<>();
-    generateLists(name, fieldTypes, fieldProperties, fieldNames, fieldsList, getters, setters, fromList);
+
+    for (Map.Entry<String, String> fieldEntry : fieldTypes.entrySet()) {
+      String fieldName = fieldEntry.getKey();
+      String fieldType = fieldEntry.getValue();
+      fieldsList.add(String.format("private %s %s;", fieldType, fieldName));
+      fieldsList.add("");
+
+      if (!fieldProperties.containsKey(fieldName)) {
+        addSetter(getters, fieldName, fieldType);
+      } else {
+        addSetter(getters, fieldName, fieldType,
+            String.format("@JsonProperty(\"%s\")", fieldProperties.get(fieldName)));
+      }
+      if (!ignored.contains(fieldName)) {
+        addGetter(setters, fieldName, fieldType);
+      }
+    }
+
     if (!fieldsList.isEmpty()) {
       fieldsList.remove(fieldsList.size() - 1);
     }
@@ -380,77 +419,44 @@ class MessageGenerator {
     if (!fieldTypes.isEmpty()) {
       int i = 0;
       for (String str : fieldTypes.keySet()) {
-        addToBuilderList(builderList, str, i++);
+        if (!ignored.contains(str)) {
+          addToBuilderList(builderList, str, i++);
+        }
       }
     }
 
     try (PrintWriter out = new PrintWriter(createFile(String.format("%s.java", name), outPath, packageName))) {
+      List<String> importsAndAnnotations = new ArrayList<>();
+      importsAndAnnotations.add("import java.util.List;");
+      importsAndAnnotations.add("");
+      importsAndAnnotations.add("import com.binance.api.enums.*;");
+      if (!fieldProperties.isEmpty()) {
+        importsAndAnnotations.add("import com.fasterxml.jackson.annotation.JsonProperty;");
+      }
+      if (isArray) {
+        importsAndAnnotations.add("import com.fasterxml.jackson.annotation.JsonFormat;");
+        importsAndAnnotations.add("");
+        importsAndAnnotations.add("@JsonFormat(shape=JsonFormat.Shape.ARRAY)");
+      } else {
+        importsAndAnnotations.add("");
+      }
+
       CodeWriter writer = new CodeWriter(out)
           .write(
               "package " + packageName + ";",
               "")
-          .write(fieldProperties.isEmpty() ?
-              List.of("import java.util.List;") :
-              List.of("import java.util.List;",
-                  "import com.fasterxml.jackson.annotation.JsonProperty;"))
-          .write("",
-              "public class " + name + " {")
+          .write(importsAndAnnotations)
+          .write("public class " + name + " {")
           .write(fieldsList)
           .write("")
           .write(constructor)
           .write(getters)
-          .write(setters)
-          .write("")
-          .write(fromList);
-
+          .write(setters);
       writeToStringMethod(writer, builderList);
       writer.write(
           "}"
       );
     }
-  }
-
-  private static void generateLists(String name, Map<String, String> fieldTypes, Map<String, String> fieldProperties, List<String> fieldNames,
-                                    List<String> fieldsList, List<String> getters, List<String> setters, List<String> fromList) {
-    fromList.add(String.format("public static %s fromList(Object ... objects) throws BinanceJsonException {", name));
-    fromList.add(String.format("%s result = new %s();", name, name));
-    fromList.add(String.format("if (objects.length != %d) {", fieldTypes.size()));
-    System.out.println(name + " " + fieldTypes.size() + " " + fieldTypes);
-    fromList.add(String.format("throw new BinanceJsonException(\"Received \" + objects.length + \" objects, expected %s\");",
-        fieldTypes.size()));
-    fromList.add("}");
-    for (int i = 0; i < fieldNames.size(); i++) {
-      String fieldName = fieldNames.get(i);
-      String fieldType = fieldTypes.get(fieldName);
-      fieldsList.add(String.format("private %s %s;", fieldType, fieldName));
-      fieldsList.add("");
-      String desiredType = fieldType.replaceAll("<.*>", "");
-      if (desiredType.equals("Double")) {
-        desiredType = "String";
-      }
-      fromList.add(String.format("if (objects[%d] instanceof %s) {", i, desiredType));
-      if (!fieldType.equals("Double")) {
-        fromList.add(String.format("result.set%s((%s) objects[%d]);", getMethodName(fieldName), fieldType, i));
-      } else {
-        fromList.add(String.format("result.set%s(Double.parseDouble((String) objects[%d]));", getMethodName(fieldName), i));
-
-      }
-      fromList.add("} else {");
-      fromList.add(String.format(
-          "throw new BinanceJsonException(\"Invalid type for %s field (position %d), expected is %s, got value \" + objects[%d]);",
-          fieldName, i, fieldType, i));
-      fromList.add("}");
-
-      if (!fieldProperties.containsKey(fieldName)) {
-        addGetter(getters, fieldName, fieldType);
-      } else {
-        addGetter(getters, fieldName, fieldType,
-            String.format("@JsonProperty(\"%s\")", fieldProperties.get(fieldName)));
-      }
-      addSetter(setters, fieldName, fieldType);
-    }
-    fromList.add("return result;");
-    fromList.add("}");
   }
 
   private static void handleEnum(Node node, String packageName) throws IOException {
