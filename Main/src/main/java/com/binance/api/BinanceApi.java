@@ -13,7 +13,6 @@ import com.binance.api.beans.Trade;
 import com.binance.api.beans.Trades;
 import com.binance.api.beans.WithdrawHistory;
 import com.binance.api.beans.WithdrawResponse;
-import com.binance.api.enums.Interval;
 import com.binance.api.messages.AccountMessage;
 import com.binance.api.messages.AllOrdersMessage;
 import com.binance.api.messages.CancelOrderMessage;
@@ -28,9 +27,6 @@ import com.binance.api.messages.StartStreamMessage;
 import com.binance.api.messages.TradesMessage;
 import com.binance.api.messages.WithdrawHistoryMessage;
 import com.binance.api.messages.WithdrawMessage;
-import com.binance.api.websocket.AggTradeSocket;
-import com.binance.api.websocket.DepthSocket;
-import com.binance.api.websocket.KlinesSocket;
 import com.binance.api.websocket.UserDataSocket;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -117,42 +113,6 @@ public class BinanceApi extends BinanceApiPublic {
 
   public Success closeStream(CloseStreamMessage stream) {
     return jsonMap(Util.httpPut(stream.getQuery(), basicHeader), Success.class);
-  }
-
-  public Session getDepthSession(String symbol, DepthSocket socket) {
-    String uri = String.format("wss://stream.binance.com:9443/ws/%s@depth", symbol);
-    WebSocketClient client = new WebSocketClient();
-    try {
-      client.start();
-      return client.connect(socket, new URI(uri)).get();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  public Session getKlineSession(String symbol, Interval interval, KlinesSocket socket) {
-    String uri = String.format("wss://stream.binance.com:9443/ws/%s@kline_%s", symbol, interval);
-    WebSocketClient client = new WebSocketClient();
-    try {
-      client.start();
-      return client.connect(socket, new URI(uri)).get();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  public Session getAggTradeSession(String symbol, AggTradeSocket socket) {
-    String uri = String.format("wss://stream.binance.com:9443/ws/%s@aggTrade", symbol);
-    WebSocketClient client = new WebSocketClient();
-    try {
-      client.start();
-      return client.connect(socket, new URI(uri)).get();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
   }
 
   public Session getUserDataSession(String listenKey, UserDataSocket socket) {

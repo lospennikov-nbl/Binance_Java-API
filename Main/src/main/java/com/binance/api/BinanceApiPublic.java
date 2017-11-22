@@ -12,6 +12,7 @@ import com.binance.api.beans.PriceChangeStat;
 import com.binance.api.beans.Success;
 import com.binance.api.beans.SymbolPrice;
 import com.binance.api.beans.Time;
+import com.binance.api.enums.Interval;
 import com.binance.api.messages.AggTradesMessage;
 import com.binance.api.messages.AllBookTickersMessage;
 import com.binance.api.messages.AllPricesMessage;
@@ -20,9 +21,15 @@ import com.binance.api.messages.KlinesMessage;
 import com.binance.api.messages.PingMessage;
 import com.binance.api.messages.TickerMessage;
 import com.binance.api.messages.TimeMessage;
+import com.binance.api.websocket.AggTradeSocket;
+import com.binance.api.websocket.DepthSocket;
+import com.binance.api.websocket.KlinesSocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -64,6 +71,43 @@ public class BinanceApiPublic {
   public AllBookTickers getAllBockTickers() {
     return getJsonMapToList(AllBookTickersMessage.getQuery(), AllBookTickers::new, BookTicker[].class);
   }
+
+  public Session getDepthSession(String symbol, DepthSocket socket) {
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@depth", symbol);
+    WebSocketClient client = new WebSocketClient();
+    try {
+      client.start();
+      return client.connect(socket, new URI(uri)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public Session getKlineSession(String symbol, Interval interval, KlinesSocket socket) {
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@kline_%s", symbol, interval);
+    WebSocketClient client = new WebSocketClient();
+    try {
+      client.start();
+      return client.connect(socket, new URI(uri)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public Session getAggTradeSession(String symbol, AggTradeSocket socket) {
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@aggTrade", symbol);
+    WebSocketClient client = new WebSocketClient();
+    try {
+      client.start();
+      return client.connect(socket, new URI(uri)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
 
   private <T, E> T getJsonMapToList(String query, Function<List<E>, T> constructor, Class<E[]> inner) {
     return jsonMapToList(httpGet(query), constructor, inner);
