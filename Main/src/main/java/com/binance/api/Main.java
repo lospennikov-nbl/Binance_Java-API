@@ -23,6 +23,7 @@ public class Main {
       e.printStackTrace();
     }
     BinanceApi api = new BinanceApi(privateKey, apiKey);
+    System.out.println(api.getAccountInfo());
     UserDataSocket socket = new UserDataSocket() {
       @Override
       public void onMessage(Object a) {

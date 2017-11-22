@@ -73,7 +73,7 @@ public class BinanceApiPublic {
   }
 
   public Session getDepthSession(String symbol, DepthSocket socket) {
-    String uri = String.format("wss://stream.binance.com:9443/ws/%s@depth", symbol);
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@depth", symbol.toLowerCase());
     WebSocketClient client = new WebSocketClient();
     try {
       client.start();
@@ -85,7 +85,7 @@ public class BinanceApiPublic {
   }
 
   public Session getKlineSession(String symbol, Interval interval, KlinesSocket socket) {
-    String uri = String.format("wss://stream.binance.com:9443/ws/%s@kline_%s", symbol, interval);
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@kline_%s", symbol.toLowerCase(), interval);
     WebSocketClient client = new WebSocketClient();
     try {
       client.start();
@@ -97,7 +97,7 @@ public class BinanceApiPublic {
   }
 
   public Session getAggTradeSession(String symbol, AggTradeSocket socket) {
-    String uri = String.format("wss://stream.binance.com:9443/ws/%s@aggTrade", symbol);
+    String uri = String.format("wss://stream.binance.com:9443/ws/%s@aggTrade", symbol.toLowerCase());
     WebSocketClient client = new WebSocketClient();
     try {
       client.start();
